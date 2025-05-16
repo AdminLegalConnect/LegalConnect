@@ -11,6 +11,9 @@ const PlainteDetail = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  const [newFiles, setNewFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
   const fetchComplaint = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -73,11 +76,44 @@ const PlainteDetail = () => {
         }
       );
 
-      // Recharger la plainte pour mettre à jour la liste
-      fetchComplaint();
+      fetchComplaint(); // Recharger la plainte
     } catch (err) {
       console.error(err);
       setError("Erreur lors de la suppression du fichier");
+    }
+  };
+
+  const handleUploadFiles = async () => {
+    if (newFiles.length === 0) return;
+    setUploading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      for (const file of newFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        await axios.post(
+          `http://localhost:5000/api/complaints/${id}/coffre-fort`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      setSuccess("Fichier(s) ajouté(s) avec succès !");
+      setNewFiles([]);
+      fetchComplaint();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'envoi des fichiers");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -143,6 +179,31 @@ const PlainteDetail = () => {
             ))}
           </ul>
         )}
+      </div>
+
+      {/* 📤 Upload de nouveaux fichiers */}
+      <div style={{ marginTop: "2rem" }}>
+        <h3>Ajouter de nouveaux fichiers :</h3>
+        <input
+          type="file"
+          multiple
+          onChange={(e) => setNewFiles(Array.from(e.target.files))}
+          style={{ marginTop: "0.5rem" }}
+        />
+        {newFiles.length > 0 && (
+          <ul style={styles.fileList}>
+            {newFiles.map((file, index) => (
+              <li key={index} style={styles.fileItem}>{file.name}</li>
+            ))}
+          </ul>
+        )}
+        <button
+          onClick={handleUploadFiles}
+          style={styles.uploadButton}
+          disabled={uploading}
+        >
+          {uploading ? "Téléversement en cours..." : "Ajouter au coffre-fort"}
+        </button>
       </div>
 
       <button onClick={() => navigate("/mes-plaintes")} style={styles.back}>
@@ -231,6 +292,17 @@ const styles = {
     border: "none",
     color: "#ef4444",
     cursor: "pointer",
+    fontSize: "1rem",
+  },
+  uploadButton: {
+    marginTop: "1rem",
+    padding: "0.6rem 1rem",
+    backgroundColor: "#16a34a",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
     fontSize: "1rem",
   },
   info: {
