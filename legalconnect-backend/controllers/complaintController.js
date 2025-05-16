@@ -65,7 +65,10 @@ const getComplaintsForAvocat = async (req, res) => {
 // ✅ Récupérer une plainte par ID
 const getComplaintById = async (req, res) => {
   try {
-    const complaint = await Complaint.findById(req.params.id).populate("utilisateur");
+    const complaint = await Complaint.findById(req.params.id)
+  .populate("utilisateur")
+  .populate("chat.expediteur"); // 👈 Ceci est crucial pour avoir les infos utilisateur dans chaque message
+
 
     if (!complaint) {
       return res.status(404).json({ error: "Plainte non trouvée" });

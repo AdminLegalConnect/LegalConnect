@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
-import logo from "../../assets/logo.png"; // adapte le chemin si besoin
+import logo from "../../assets/logo.png";
 
 const Header = () => {
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,16 +15,20 @@ const Header = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.leftContainer}>
-        <div style={styles.logoContainer}>
-          <img src={logo} alt="LegalConnect" style={styles.logo} />
-          <span style={styles.logoText}>LegalConnect</span>
-        </div>
-        <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
+      <div style={styles.logoContainer}>
+        <img src={logo} alt="LegalConnect" style={styles.logo} />
+        <span style={styles.logoText}>LegalConnect</span>
       </div>
-      <button onClick={handleLogout} style={styles.logoutButton}>
-        Déconnexion
-      </button>
+
+      <div style={styles.navLinks}>
+        {user && (
+          <>
+            <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
+            <Link to="/mes-avis" style={styles.link}>Mes avis</Link>
+          </>
+        )}
+        <button onClick={handleLogout} style={styles.logoutButton}>Déconnexion</button>
+      </div>
     </header>
   );
 };
@@ -39,11 +43,6 @@ const styles = {
     alignItems: "center",
     borderBottom: "2px solid #3b82f6",
   },
-  leftContainer: {
-    display: "flex",
-    alignItems: "center",
-    gap: "2rem",
-  },
   logoContainer: {
     display: "flex",
     alignItems: "center",
@@ -57,12 +56,15 @@ const styles = {
     fontSize: "1.2rem",
     fontWeight: "bold",
   },
+  navLinks: {
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+  },
   link: {
     color: "white",
     textDecoration: "none",
     fontWeight: "bold",
-    fontSize: "1rem",
-    transition: "opacity 0.2s",
   },
   logoutButton: {
     backgroundColor: "#ef4444",

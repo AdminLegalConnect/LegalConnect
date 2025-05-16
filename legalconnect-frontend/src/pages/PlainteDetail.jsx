@@ -125,7 +125,6 @@ const PlainteDetail = () => {
         <button type="submit" style={styles.button}>Enregistrer les modifications</button>
       </form>
 
-      {/* Fichiers */}
       <div style={styles.coffreContainer}>
         <h3>Fichiers du coffre-fort :</h3>
         {complaint.coffre_fort.length === 0 ? (
@@ -145,7 +144,6 @@ const PlainteDetail = () => {
         )}
       </div>
 
-      {/* Upload */}
       <div style={{ marginTop: "2rem" }}>
         <h3>Ajouter de nouveaux fichiers :</h3>
         <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
@@ -159,23 +157,40 @@ const PlainteDetail = () => {
         </button>
       </div>
 
-      {/* Chat */}
       <div style={{ marginTop: "3rem" }}>
         <h3>Discussion :</h3>
         <div style={styles.chatBox}>
           {complaint.chat.length === 0 ? (
             <p style={styles.info}>Aucun message pour le moment.</p>
           ) : (
-            complaint.chat.map((msg) => (
-              <div key={msg._id} style={styles.message}>
-                <strong>{msg.expediteur?.email || "Utilisateur"}</strong>
-                {msg.expediteur?.role && (
-                  <span style={styles.tag}>{msg.expediteur.role}</span>
-                )}
-                <p>{msg.message}</p>
-                <small>{new Date(msg.date).toLocaleString()}</small>
-              </div>
-            ))
+            complaint.chat.map((msg) => {
+              const isParticulier = msg.expediteur?.role === "particulier";
+              return (
+                <div
+                  key={msg._id}
+                  style={{
+                    ...styles.message,
+                    alignSelf: isParticulier ? "flex-end" : "flex-start",
+                    backgroundColor: isParticulier ? "#dbeafe" : "#f3f4f6",
+                  }}
+                >
+                  <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
+                  {msg.expediteur?.role && (
+                    <span
+                      style={{
+                        ...styles.tag,
+                        backgroundColor: isParticulier ? "#a5b4fc" : "#cbd5e1",
+                        color: isParticulier ? "#1e3a8a" : "#374151",
+                      }}
+                    >
+                      {msg.expediteur.role}
+                    </span>
+                  )}
+                  <p>{msg.message}</p>
+                  <small>{new Date(msg.date).toLocaleString()}</small>
+                </div>
+              );
+            })
           )}
         </div>
 
@@ -214,9 +229,9 @@ const styles = {
   deleteButton: { background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1rem" },
   uploadButton: { marginTop: "1rem", padding: "0.6rem 1rem", backgroundColor: "#16a34a", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", fontSize: "1rem" },
   info: { fontStyle: "italic", color: "#555" },
-  chatBox: { marginTop: "1rem", background: "#f3f4f6", padding: "1rem", borderRadius: "8px", maxHeight: "300px", overflowY: "auto" },
-  message: { marginBottom: "1rem", paddingBottom: "0.5rem", borderBottom: "1px solid #e5e7eb" },
-  tag: { marginLeft: "0.5rem", fontSize: "0.75rem", backgroundColor: "#e0e7ff", color: "#3730a3", padding: "2px 6px", borderRadius: "6px" }
+  chatBox: { marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "300px", overflowY: "auto" },
+  message: { padding: "1rem", borderRadius: "12px", maxWidth: "80%", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", fontSize: "0.95rem" },
+  tag: { marginLeft: "0.5rem", fontSize: "0.75rem", padding: "2px 6px", borderRadius: "6px", fontWeight: "bold" },
 };
 
 export default PlainteDetail;
