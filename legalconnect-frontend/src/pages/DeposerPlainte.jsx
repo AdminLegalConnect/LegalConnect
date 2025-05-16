@@ -9,6 +9,7 @@ const DeposerPlainte = () => {
 
   const [titre, setTitre] = useState("");
   const [description, setDescription] = useState("");
+  const [file, setFile] = useState(null); // 👈 fichier à uploader
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -18,6 +19,7 @@ const DeposerPlainte = () => {
     try {
       const token = localStorage.getItem("token");
 
+      // 1. Créer la plainte (sans fichier)
       const res = await axios.post(
         "http://localhost:5000/api/complaints",
         { titre, description },
@@ -28,13 +30,32 @@ const DeposerPlainte = () => {
         }
       );
 
+      const plainteId = res.data.complaint._id;
+
+      // 2. Si fichier sélectionné, on l’envoie au coffre-fort de cette plainte
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        await axios.post(
+          `http://localhost:5000/api/complaints/${plainteId}/coffre-fort`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
       setSuccess("Plainte déposée avec succès !");
       setError("");
       setTitre("");
       setDescription("");
-      // Redirection possible :
-      // navigate("/dashboard");
+      setFile(null);
     } catch (err) {
+      console.error(err);
       setError("Erreur lors du dépôt de la plainte");
       setSuccess("");
     }
@@ -59,6 +80,11 @@ const DeposerPlainte = () => {
           required
           rows={6}
           style={styles.textarea}
+        />
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          style={styles.input}
         />
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}
