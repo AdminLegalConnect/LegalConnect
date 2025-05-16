@@ -52,6 +52,12 @@ const MesPlaintes = () => {
                 <span><strong>Créée le :</strong>{" "}
                   {new Date(complaint.date_creation).toLocaleDateString()}</span>
               </p>
+              <button
+                onClick={() => navigate(`/mes-plaintes/${complaint._id}`)}
+                style={styles.button}
+              >
+                Voir
+              </button>
             </li>
           ))}
         </ul>
@@ -96,6 +102,17 @@ const styles = {
     marginTop: "0.5rem",
     fontSize: "0.9rem",
     color: "#6b7280",
+  },
+  button: {
+    marginTop: "0.8rem",
+    padding: "0.4rem 0.8rem",
+    backgroundColor: "#2563EB",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    fontWeight: "bold",
   },
   error: {
     color: "red",
