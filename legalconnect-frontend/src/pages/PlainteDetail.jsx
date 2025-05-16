@@ -89,6 +89,32 @@ const PlainteDetail = () => {
         </button>
       </form>
 
+      {/* 📁 Affichage des fichiers du coffre-fort */}
+      <div style={styles.coffreContainer}>
+        <h3>Fichiers du coffre-fort :</h3>
+        {complaint.coffre_fort.length === 0 ? (
+          <p style={styles.info}>Aucun fichier joint.</p>
+        ) : (
+          <ul style={styles.fileList}>
+            {complaint.coffre_fort.map((file) => (
+              <li key={file._id} style={styles.fileItem}>
+                <a
+                  href={`http://localhost:5000${file.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.link}
+                >
+                  {file.nom_fichier}
+                </a>{" "}
+                <span style={styles.meta}>
+                  ({file.type} – {new Date(file.date_upload).toLocaleDateString()})
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <button onClick={() => navigate("/mes-plaintes")} style={styles.back}>
         ⬅ Retour à mes plaintes
       </button>
@@ -111,6 +137,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "1rem",
+    marginBottom: "2rem",
   },
   input: {
     padding: "0.6rem",
@@ -134,7 +161,7 @@ const styles = {
     fontWeight: "bold",
   },
   back: {
-    marginTop: "1.5rem",
+    marginTop: "2rem",
     background: "none",
     border: "none",
     color: "#2563EB",
@@ -146,6 +173,30 @@ const styles = {
   },
   success: {
     color: "green",
+  },
+  coffreContainer: {
+    marginTop: "1rem",
+  },
+  fileList: {
+    listStyle: "none",
+    padding: 0,
+    marginTop: "0.5rem",
+  },
+  fileItem: {
+    marginBottom: "0.5rem",
+  },
+  link: {
+    color: "#1d4ed8",
+    textDecoration: "underline",
+  },
+  meta: {
+    fontSize: "0.85rem",
+    color: "#6b7280",
+    marginLeft: "0.5rem",
+  },
+  info: {
+    fontStyle: "italic",
+    color: "#555",
   },
 };
 
