@@ -9,7 +9,7 @@ const DeposerPlainte = () => {
 
   const [titre, setTitre] = useState("");
   const [description, setDescription] = useState("");
-  const [file, setFile] = useState(null); // 👈 fichier à uploader
+  const [files, setFiles] = useState([]); // 👈 multiple fichiers
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -19,7 +19,7 @@ const DeposerPlainte = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // 1. Créer la plainte (sans fichier)
+      // Étape 1 : créer la plainte
       const res = await axios.post(
         "http://localhost:5000/api/complaints",
         { titre, description },
@@ -32,31 +32,33 @@ const DeposerPlainte = () => {
 
       const plainteId = res.data.complaint._id;
 
-      // 2. Si fichier sélectionné, on l’envoie au coffre-fort de cette plainte
-      if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
+      // Étape 2 : envoyer chaque fichier
+      if (files.length > 0) {
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append("file", file);
 
-        await axios.post(
-          `http://localhost:5000/api/complaints/${plainteId}/coffre-fort`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+          await axios.post(
+            `http://localhost:5000/api/complaints/${plainteId}/coffre-fort`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+        }
       }
 
-      setSuccess("Plainte déposée avec succès !");
+      setSuccess("Plainte et fichiers envoyés avec succès !");
       setError("");
       setTitre("");
       setDescription("");
-      setFile(null);
+      setFiles([]);
     } catch (err) {
       console.error(err);
-      setError("Erreur lors du dépôt de la plainte");
+      setError("Erreur lors de l’envoi.");
       setSuccess("");
     }
   };
@@ -83,9 +85,17 @@ const DeposerPlainte = () => {
         />
         <input
           type="file"
-          onChange={(e) => setFile(e.target.files[0])}
+          multiple
+          onChange={(e) => setFiles(Array.from(e.target.files))}
           style={styles.input}
         />
+        {files.length > 0 && (
+          <ul>
+            {files.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+        )}
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}
         <button type="submit" style={styles.button}>
