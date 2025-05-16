@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/"); // Redirige vers la page de login
+      navigate("/");
       return;
     }
 
@@ -35,24 +35,71 @@ const Dashboard = () => {
     fetchOptions();
   }, [user, navigate]);
 
-  return (
-    <div>
-      <h1>Bienvenue, {user?.email}</h1>
-      <p>Rôle : {user?.role}</p>
+  const handleClick = (key) => {
+    // ici tu peux rediriger selon la clé
+    if (key === "deposerUnDossier") navigate("/deposer-dossier");
+    if (key === "deposerUnePlainte") navigate("/deposer-plainte");
+    if (key === "explorerLesThematiques") navigate("/thematiques");
+    if (key === "chercherUnDossier") navigate("/recherche-avis");
+    if (key === "chercherUnePlainte") navigate("/recherche-plainte");
+  };
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.heading}>Bienvenue, {user?.email}</h1>
+      <p style={styles.subheading}>Rôle : {user?.role}</p>
+
+      {error && <p style={styles.error}>{error}</p>}
 
       {options ? (
-        <ul>
+        <div style={styles.optionsGrid}>
           {Object.entries(options).map(([key, label]) => (
-            <li key={key}>{label}</li>
+            <button key={key} style={styles.optionButton} onClick={() => handleClick(key)}>
+              {label}
+            </button>
           ))}
-        </ul>
+        </div>
       ) : (
         <p>Chargement des options...</p>
       )}
     </div>
   );
+};
+
+const styles = {
+  container: {
+    maxWidth: "800px",
+    margin: "0 auto",
+    padding: "2rem",
+    fontFamily: "sans-serif",
+  },
+  heading: {
+    fontSize: "2rem",
+    fontWeight: "bold",
+  },
+  subheading: {
+    color: "gray",
+  },
+  error: {
+    color: "red",
+    marginTop: "1rem",
+  },
+  optionsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "1rem",
+    marginTop: "2rem",
+  },
+  optionButton: {
+    padding: "1rem",
+    fontSize: "1rem",
+    borderRadius: "10px",
+    border: "none",
+    backgroundColor: "#4F46E5",
+    color: "white",
+    cursor: "pointer",
+    transition: "background 0.2s",
+  },
 };
 
 export default Dashboard;
