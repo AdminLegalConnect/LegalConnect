@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import Header from "../components/Layout/Header"; // <-- intégration du Header
 import { FiEdit, FiSearch, FiFolder, FiLayers } from "react-icons/fi";
 
 const iconMap = {
@@ -53,25 +54,32 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Bienvenue, {user?.email}</h1>
-      <p style={styles.subheading}>Rôle : {user?.role}</p>
+    <>
+      <Header /> {/* <- insertion du Header ici */}
+      <div style={styles.container}>
+        <h1 style={styles.heading}>Bienvenue, {user?.email}</h1>
+        <p style={styles.subheading}>Rôle : {user?.role}</p>
 
-      {error && <p style={styles.error}>{error}</p>}
+        {error && <p style={styles.error}>{error}</p>}
 
-      {options ? (
-        <div style={styles.optionsGrid}>
-          {Object.entries(options).map(([key, label]) => (
-            <button key={key} style={styles.optionButton} onClick={() => handleClick(key)}>
-              <div style={styles.icon}>{iconMap[key]}</div>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p>Chargement des options...</p>
-      )}
-    </div>
+        {options ? (
+          <div style={styles.optionsGrid}>
+            {Object.entries(options).map(([key, label]) => (
+              <button
+                key={key}
+                style={styles.optionButton}
+                onClick={() => handleClick(key)}
+              >
+                <div style={styles.icon}>{iconMap[key]}</div>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p>Chargement des options...</p>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -104,7 +112,7 @@ const styles = {
     fontSize: "1rem",
     borderRadius: "12px",
     border: "none",
-    backgroundColor: "#2563EB", // bleu profond
+    backgroundColor: "#2563EB",
     color: "white",
     cursor: "pointer",
     display: "flex",
