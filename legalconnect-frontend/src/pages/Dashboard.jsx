@@ -2,6 +2,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import { FiEdit, FiSearch, FiFolder, FiLayers } from "react-icons/fi";
+
+const iconMap = {
+  deposerUnDossier: <FiEdit size={24} />,
+  deposerUnePlainte: <FiFolder size={24} />,
+  explorerLesThematiques: <FiLayers size={24} />,
+  chercherUnDossier: <FiSearch size={24} />,
+  chercherUnePlainte: <FiSearch size={24} />,
+};
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -36,7 +45,6 @@ const Dashboard = () => {
   }, [user, navigate]);
 
   const handleClick = (key) => {
-    // ici tu peux rediriger selon la clé
     if (key === "deposerUnDossier") navigate("/deposer-dossier");
     if (key === "deposerUnePlainte") navigate("/deposer-plainte");
     if (key === "explorerLesThematiques") navigate("/thematiques");
@@ -55,7 +63,8 @@ const Dashboard = () => {
         <div style={styles.optionsGrid}>
           {Object.entries(options).map(([key, label]) => (
             <button key={key} style={styles.optionButton} onClick={() => handleClick(key)}>
-              {label}
+              <div style={styles.icon}>{iconMap[key]}</div>
+              <span>{label}</span>
             </button>
           ))}
         </div>
@@ -68,7 +77,7 @@ const Dashboard = () => {
 
 const styles = {
   container: {
-    maxWidth: "800px",
+    maxWidth: "900px",
     margin: "0 auto",
     padding: "2rem",
     fontFamily: "sans-serif",
@@ -86,19 +95,26 @@ const styles = {
   },
   optionsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "1rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1.5rem",
     marginTop: "2rem",
   },
   optionButton: {
-    padding: "1rem",
+    padding: "1.2rem",
     fontSize: "1rem",
-    borderRadius: "10px",
+    borderRadius: "12px",
     border: "none",
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#2563EB", // bleu profond
     color: "white",
     cursor: "pointer",
-    transition: "background 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.8rem",
+    transition: "background 0.3s",
+  },
+  icon: {
+    display: "flex",
+    alignItems: "center",
   },
 };
 
