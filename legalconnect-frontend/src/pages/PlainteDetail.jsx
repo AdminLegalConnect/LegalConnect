@@ -11,26 +11,26 @@ const PlainteDetail = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  const fetchComplaint = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`http://localhost:5000/api/complaints/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setComplaint(res.data.complaint);
+      setTitre(res.data.complaint.titre);
+      setDescription(res.data.complaint.description);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger la plainte");
+    }
+  };
+
   useEffect(() => {
-    const fetchComplaint = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const res = await axios.get(`http://localhost:5000/api/complaints/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setComplaint(res.data.complaint);
-        setTitre(res.data.complaint.titre);
-        setDescription(res.data.complaint.description);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger la plainte");
-      }
-    };
-
     fetchComplaint();
   }, [id]);
 
@@ -55,6 +55,29 @@ const PlainteDetail = () => {
     } catch (err) {
       console.error(err);
       setError("Erreur lors de la mise à jour");
+    }
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    if (!window.confirm("Supprimer ce fichier définitivement ?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(
+        `http://localhost:5000/api/complaints/${id}/coffre-fort/${fileId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Recharger la plainte pour mettre à jour la liste
+      fetchComplaint();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de la suppression du fichier");
     }
   };
 
@@ -109,6 +132,13 @@ const PlainteDetail = () => {
                 <span style={styles.meta}>
                   ({file.type} – {new Date(file.date_upload).toLocaleDateString()})
                 </span>
+                <button
+                  onClick={() => handleDeleteFile(file._id)}
+                  style={styles.deleteButton}
+                  title="Supprimer le fichier"
+                >
+                  🗑
+                </button>
               </li>
             ))}
           </ul>
@@ -184,6 +214,9 @@ const styles = {
   },
   fileItem: {
     marginBottom: "0.5rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
   },
   link: {
     color: "#1d4ed8",
@@ -192,7 +225,13 @@ const styles = {
   meta: {
     fontSize: "0.85rem",
     color: "#6b7280",
-    marginLeft: "0.5rem",
+  },
+  deleteButton: {
+    background: "transparent",
+    border: "none",
+    color: "#ef4444",
+    cursor: "pointer",
+    fontSize: "1rem",
   },
   info: {
     fontStyle: "italic",
