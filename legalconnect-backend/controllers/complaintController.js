@@ -236,6 +236,25 @@ const deleteCoffreFortFile = async (req, res) => {
   }
 };
 
+// ✅ Récupérer les plaintes de l'utilisateur connecté (particulier)
+const getMyComplaints = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const complaints = await Complaint.find({ utilisateur: userId }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Plaintes de l'utilisateur récupérées avec succès",
+      complaints,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Erreur serveur",
+      error: err.message,
+    });
+  }
+};
+
+
 module.exports = {
   createComplaint,
   getComplaintsForAvocat,
@@ -245,4 +264,5 @@ module.exports = {
   addChatMessage,
   addCoffreFortFile,
   deleteCoffreFortFile,
+  getMyComplaints,
 };

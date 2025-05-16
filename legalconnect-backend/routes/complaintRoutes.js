@@ -12,6 +12,7 @@ const {
   addChatMessage,
   addCoffreFortFile,
   deleteCoffreFortFile,
+  getMyComplaints,
 } = require("../controllers/complaintController");
 
 // Routes de base pour les plaintes
@@ -19,6 +20,7 @@ router.post("/complaints", authMiddleware, createComplaint);
 router.get("/complaints", authMiddleware, getComplaintsForAvocat);  // Changement ici
 router.get("/complaints/:id", authMiddleware, getComplaintById);
 router.put("/complaints/:id", authMiddleware, updateComplaint);
+router.get("/my-complaints", authMiddleware, getMyComplaints);
 
 // Routes pour les fonctionnalités spécifiques
 router.put("/complaints/:id/status", authMiddleware, updateComplaintStatus);

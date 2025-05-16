@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
-import logo from "../../assets/logo.png"; // à adapter si tu ajoutes le fichier dans assets/
+import logo from "../../assets/logo.png"; // adapte le chemin si besoin
 
 const Header = () => {
   const { setUser } = useContext(AuthContext);
@@ -15,9 +15,12 @@ const Header = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer}>
-        <img src={logo} alt="LegalConnect" style={styles.logo} />
-        <span style={styles.logoText}>LegalConnect</span>
+      <div style={styles.leftContainer}>
+        <div style={styles.logoContainer}>
+          <img src={logo} alt="LegalConnect" style={styles.logo} />
+          <span style={styles.logoText}>LegalConnect</span>
+        </div>
+        <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
       </div>
       <button onClick={handleLogout} style={styles.logoutButton}>
         Déconnexion
@@ -36,6 +39,11 @@ const styles = {
     alignItems: "center",
     borderBottom: "2px solid #3b82f6",
   },
+  leftContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2rem",
+  },
   logoContainer: {
     display: "flex",
     alignItems: "center",
@@ -48,6 +56,13 @@ const styles = {
   logoText: {
     fontSize: "1.2rem",
     fontWeight: "bold",
+  },
+  link: {
+    color: "white",
+    textDecoration: "none",
+    fontWeight: "bold",
+    fontSize: "1rem",
+    transition: "opacity 0.2s",
   },
   logoutButton: {
     backgroundColor: "#ef4444",
