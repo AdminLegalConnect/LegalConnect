@@ -28,6 +28,8 @@ function App() {
       <Route path="/deposer-dossier" element={<DeposerAvis />} />
       <Route path="/mes-avis" element={<MesAvis />} />
       <Route path="/mes-avis/:id" element={<AvisDetail />} />
+      <Route path="/deposer-avis" element={<DeposerAvis />} />
+
     </Routes>
   );
 }

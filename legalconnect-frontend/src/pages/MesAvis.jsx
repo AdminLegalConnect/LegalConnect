@@ -1,4 +1,4 @@
-// MesAvis.jsx
+// pages/MesAvis.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
@@ -22,7 +22,9 @@ const MesAvis = () => {
           },
         });
 
-        setAvisList(res.data.avis);
+        setAvisList(
+          res.data.avis.sort((a, b) => new Date(b.dateDepot) - new Date(a.dateDepot))
+        );
       } catch (err) {
         setError("Erreur lors de la récupération des avis");
         console.error(err);
@@ -37,6 +39,12 @@ const MesAvis = () => {
     <>
       <Header />
       <div style={styles.container}>
+        <div style={styles.newButtonBox}>
+          <button onClick={() => navigate("/deposer-avis")} style={styles.newButton}>
+            + Nouveau dossier
+          </button>
+        </div>
+
         <h2 style={styles.heading}>Mes avis</h2>
         {error && <p style={styles.error}>{error}</p>}
         {avisList.length === 0 ? (
@@ -52,9 +60,28 @@ const MesAvis = () => {
                     : avis.description}
                 </p>
                 <p style={styles.meta}>
-                  <span><strong>Statut :</strong> {avis.statut}</span> •{" "}
-                  <span><strong>Déposé le :</strong>{" "}
-                    {new Date(avis.dateDepot).toLocaleDateString()}</span>
+                  <span style={{
+                    padding: "0.2rem 0.6rem",
+                    borderRadius: "999px",
+                    backgroundColor:
+                      avis.statut === "en attente" ? "#fef3c7" :
+                      avis.statut === "en cours" ? "#bfdbfe" :
+                      "#d1fae5",
+                    color:
+                      avis.statut === "en attente" ? "#92400e" :
+                      avis.statut === "en cours" ? "#1e40af" :
+                      "#065f46",
+                    fontWeight: "bold",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                  }}>
+                    {avis.statut}
+                  </span> • {" "}
+                  <span><strong>Déposé le :</strong> {new Date(avis.dateDepot).toLocaleDateString("fr-FR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}</span>
                 </p>
                 <button
                   onClick={() => navigate(`/mes-avis/${avis._id}`)}
@@ -77,6 +104,20 @@ const styles = {
     margin: "2rem auto",
     padding: "1rem",
     fontFamily: "sans-serif",
+  },
+  newButtonBox: {
+    textAlign: "right",
+    marginBottom: "1rem",
+  },
+  newButton: {
+    backgroundColor: "#10b981",
+    color: "white",
+    border: "none",
+    padding: "0.6rem 1.2rem",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "0.9rem",
   },
   heading: {
     fontSize: "1.8rem",
@@ -118,6 +159,7 @@ const styles = {
     cursor: "pointer",
     fontSize: "0.9rem",
     fontWeight: "bold",
+    transition: "background-color 0.2s",
   },
   error: {
     color: "red",
