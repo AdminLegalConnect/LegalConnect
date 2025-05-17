@@ -380,7 +380,12 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
             )}
 
             <button onClick={handleCopyLink} style={styles.button}>Partager / Copier le lien</button>
-            <button onClick={handleDeleteComplaint} style={styles.deleteButton}>🗑 Supprimer la plainte</button>
+            {user && complaint.utilisateur && (user._id || user.id) === complaint.utilisateur._id && (
+  <button onClick={handleDeleteComplaint} style={styles.deleteButton}>
+    🗑 Supprimer la plainte
+  </button>
+)}
+
           </div>
         )}
 
