@@ -344,14 +344,7 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
               <button onClick={handleInvite} style={styles.button}>Inviter</button>
             </div>
 
-            <div>
-  <p>Visibilité actuelle : <strong>{avis.visibilite}</strong></p>
-  {isCreator && (
-    <button onClick={handleVisibilite} style={styles.button}>
-      Rendre {avis.visibilite === "publique" ? "privée" : "publique"}
-    </button>
-  )}
-</div>
+
 
 
             {avis.utilisateur && (

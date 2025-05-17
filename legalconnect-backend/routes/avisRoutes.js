@@ -12,6 +12,7 @@ const {
   getAvisById,
   deleteAvis,
   getAvisForParticulier,
+  inviterParticipant,
   updateAvis
 } = require('../controllers/avisController');
 
@@ -35,6 +36,9 @@ router.get('/avis/:id', authMiddleware, getAvisById);
 router.delete('/avis/:id', authMiddleware, deleteAvis);
 
 router.put('/avis/:id', authMiddleware, updateAvis);
+
+router.post('/avis/:id/inviter', authMiddleware, inviterParticipant);
+
 
 
 

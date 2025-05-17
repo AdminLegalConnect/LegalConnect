@@ -5,6 +5,7 @@ const avisSchema = new mongoose.Schema({
   utilisateurId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   titre: { type: String, required: true },
   description: { type: String, required: true },
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   statut: { type: String, enum: ["en attente", "en cours", "résolu"], default: "en attente" },  // Statut de l'avis
   chat: [
     {

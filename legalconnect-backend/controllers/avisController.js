@@ -81,7 +81,13 @@ const addCoffreFortFile = async (req, res) => {
 // Récupérer les avis de l'utilisateur connecté
 const getAvisByUser = async (req, res) => {
   try {
-    const avis = await Avis.find({ utilisateurId: req.user.id });
+    const avis = await Avis.find({
+  $or: [
+    { utilisateurId: req.user.id },
+    { participants: req.user.id }
+  ]
+});
+
     res.status(200).json({ avis });
   } catch (error) {
     console.error(error.message);
@@ -107,14 +113,21 @@ const getAvisForParticulier = async (req, res) => {
 // Récupérer un avis par ID
 const getAvisById = async (req, res) => {
   try {
-    const avis = await Avis.findById(req.params.id).populate('chat.auteurId', 'prenom email role');    if (!avis) {
+    const avis = await Avis.findById(req.params.id)
+      .populate('chat.auteurId', 'prenom email role')
+      .populate('participants', 'prenom email') // 👈 ajoute cette ligne
+      .populate('utilisateurId', 'prenom email'); // 👈 pour avoir le créateur aussi
+
+    if (!avis) {
       return res.status(404).json({ message: "Avis non trouvé" });
     }
+
     res.status(200).json({ avis });
   } catch (err) {
     res.status(500).json({ message: "Erreur lors de la récupération de l'avis", error: err.message });
   }
 };
+
 
 const deleteAvis = async (req, res) => {
   try {
@@ -156,6 +169,39 @@ const updateAvis = async (req, res) => {
   }
 };
 
+const inviterParticipant = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const avisId = req.params.id;
+
+    const userToInvite = await User.findOne({ email });
+    if (!userToInvite) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    const avis = await Avis.findById(avisId);
+    if (!avis) {
+      return res.status(404).json({ message: "Avis non trouvé" });
+    }
+
+    // Empêche d'inviter deux fois
+    if (avis.participants?.includes(userToInvite._id)) {
+      return res.status(400).json({ message: "Utilisateur déjà invité" });
+    }
+
+    // Initialise si vide
+    if (!avis.participants) avis.participants = [];
+
+    avis.participants.push(userToInvite._id);
+    await avis.save();
+
+    res.status(200).json({ message: "Participant invité avec succès", avis });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur lors de l'invitation", error: err.message });
+  }
+};
+
 
 
 
@@ -167,6 +213,7 @@ module.exports = {
   getAvisByUser,
   getAvisById,
   deleteAvis,
-  updateAvis,          
+  updateAvis,
+  inviterParticipant,          
   getAvisForParticulier
 };
