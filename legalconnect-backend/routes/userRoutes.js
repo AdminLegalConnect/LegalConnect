@@ -6,6 +6,7 @@ const {
   updateProfile,
   changePassword,
   ajouterNote,
+  deleteAccount,
   ajouterCommentaire
 } = require("../controllers/userController");
 
@@ -13,6 +14,7 @@ router.get("/profil", authMiddleware, getProfile);
 router.put("/profil", authMiddleware, updateProfile);
 router.put("/profil/motdepasse", authMiddleware, changePassword);
 router.post("/profil/note", authMiddleware, ajouterNote);
+router.delete("/profil", authMiddleware, deleteAccount);
 router.post("/profil/commentaire", authMiddleware, ajouterCommentaire);
 
 module.exports = router;

@@ -60,21 +60,22 @@ const Profile = () => {
 
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm("Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.");
-    if (!confirmed) return;
+  if (!window.confirm("Confirmez-vous la suppression de votre compte ?")) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete("http://localhost:5000/api/profil", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      localStorage.removeItem("token");
-      setUser(null);
-      navigate("/");
-    } catch (err) {
-      setError("Erreur lors de la suppression du compte");
-    }
-  };
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete("http://localhost:5000/api/profil", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/");
+  } catch (err) {
+    setError("Erreur lors de la suppression du compte");
+  }
+};
+
 
   return (
     <>

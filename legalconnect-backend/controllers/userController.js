@@ -117,10 +117,22 @@ const ajouterCommentaire = async (req, res) => {
   }
 };
 
+// 🚨 DELETE /api/profil
+const deleteAccount = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.status(200).json({ message: "Compte supprimé avec succès." });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur lors de la suppression du compte", details: err.message });
+  }
+};
+
+
 module.exports = {
   getProfile,
   updateProfile,
   changePassword,
   ajouterNote,
+  deleteAccount,
   ajouterCommentaire
 };
