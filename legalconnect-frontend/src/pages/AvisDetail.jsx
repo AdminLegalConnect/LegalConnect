@@ -95,20 +95,6 @@ const avisDetail = () => {
     }
   };
 
-  const handleVisibilite = async () => {
-    const nouvelleVisibilite = avis.visibilite === "publique" ? "privée" : "publique";
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/avis/${id}/visibilite`, { visibilite: nouvelleVisibilite }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSuccess(`avis rendue ${nouvelleVisibilite}`);
-      fetchavis();
-    } catch (err) {
-      console.error(err);
-      setError("Erreur lors du changement de visibilité");
-    }
-  };
 
   const handleDeleteavis = async () => {
     if (!window.confirm("Supprimer définitivement cette avis ?")) return;
