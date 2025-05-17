@@ -268,6 +268,17 @@ const PlainteDetail = () => {
               </button>
             </div>
 
+            {complaint.participants && complaint.participants.length > 0 && (
+              <div>
+                <p><strong>Participants :</strong></p>
+                <ul>
+                  {complaint.participants.map((p, index) => (
+                    <li key={index}>{p.prenom || p.email}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <button onClick={handleCopyLink} style={styles.button}>Partager / Copier le lien</button>
             <button onClick={handleDeleteComplaint} style={styles.deleteButton}>🗑 Supprimer la plainte</button>
           </div>
