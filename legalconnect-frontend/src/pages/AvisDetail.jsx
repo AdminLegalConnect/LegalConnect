@@ -18,7 +18,15 @@ const avisDetail = () => {
 
 
   const [avis, setavis] = useState(null);
-  const [titre, setTitre] = useState("");
+  useEffect(() => {
+  if (avis && !avis.coffreFort) {
+    setAvis((prev) => ({ ...prev, coffreFort: [] }));
+  }
+}, [avis]);
+
+const [newFile, setNewFile] = useState(null);
+const [fileDescription, setFileDescription] = useState("");
+const [titre, setTitre] = useState("");
   const [description, setDescription] = useState("");
   const [newFiles, setNewFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -133,30 +141,34 @@ const avisDetail = () => {
   };
 
   const handleUploadFiles = async () => {
-    if (newFiles.length === 0 || !user) return;
-    setUploading(true);
-    try {
-      const token = localStorage.getItem("token");
-      for (const file of newFiles) {
-        const formData = new FormData();
-        formData.append("file", file);
-        await axios.post(`http://localhost:5000/api/avis/${id}/coffre-fort`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      }
-      setSuccess("Fichier(s) ajouté(s) avec succès !");
-      setNewFiles([]);
-      fetchavis();
-    } catch (err) {
-      console.error(err);
-      setError("Erreur lors de l'envoi des fichiers");
-    } finally {
-      setUploading(false);
-    }
-  };
+  if (!newFile || !user) return;
+  setUploading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("fichier", newFile);
+    formData.append("avisId", id);
+    formData.append("description", fileDescription);
+
+    await axios.post(`http://localhost:5000/api/avis/coffre-fort`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    setSuccess("Fichier ajouté avec succès !");
+    setNewFile(null);
+    setFileDescription("");
+    fetchavis();
+  } catch (err) {
+    console.error(err);
+    setError("Erreur lors de l'envoi du fichier");
+  } finally {
+    setUploading(false);
+  }
+};
+
 
   const handleDeleteFile = async (fileId) => {
     if (!window.confirm("Supprimer ce fichier définitivement ?") || !user) return;
@@ -300,27 +312,48 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
         
 
         {activeTab === "files" && (
-          <div>
-            <h3>Fichiers :</h3>
-            {avis.coffre_fort.length === 0 ? <p>Aucun fichier</p> : (
-              <ul>
-                {avis.coffre_fort.map((file) => (
-                  <li key={file._id}>
-                    <a href={`http://localhost:5000${file.url}`} target="_blank" rel="noopener noreferrer">{file.nom_fichier}</a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {user && (
-              <>
-                <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
-                <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
-                  {uploading ? "Envoi..." : "Ajouter fichier"}
-                </button>
-              </>
-            )}
-          </div>
-        )}
+  <div>
+    <h3>Fichiers :</h3>
+    {!avis?.coffreFort || avis.coffreFort.length === 0 ? (
+      <p>Aucun fichier</p>
+    ) : (
+      <ul>
+        {avis.coffreFort.map((file, index) => (
+          <li key={index}>
+            <a href={`http://localhost:5000/${file.fichier}`} target="_blank" rel="noopener noreferrer">
+              {file.description || "Voir le fichier"}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {user && (
+      <>
+        <input
+  type="file"
+  onChange={(e) => setNewFile(e.target.files[0])}
+/>
+<input
+  type="text"
+  placeholder="Description"
+  value={fileDescription}
+  onChange={(e) => setFileDescription(e.target.value)}
+  style={{ marginLeft: "0.5rem" }}
+/>
+<button
+  onClick={handleUploadFiles}
+  style={styles.uploadButton}
+  disabled={uploading}
+>
+  {uploading ? "Envoi..." : "Ajouter fichier"}
+</button>
+
+      </>
+    )}
+  </div>
+)}
+
 
         {activeTab === "settings" && user && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
