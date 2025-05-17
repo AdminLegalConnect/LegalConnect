@@ -22,7 +22,7 @@ const MesPlaintes = () => {
           },
         });
 
-        setComplaints(res.data.complaints);
+        setComplaints(res.data.complaints.sort((a, b) => new Date(b.date_creation) - new Date(a.date_creation)));
       } catch (err) {
         setError("Erreur lors de la récupération des plaintes");
         console.error(err);
@@ -37,6 +37,12 @@ const MesPlaintes = () => {
     <>
       <Header />
       <div style={styles.container}>
+        <div style={styles.newButtonBox}>
+          <button onClick={() => navigate("/deposer-plainte")} style={styles.newButton}>
+            + Nouveau dossier
+          </button>
+        </div>
+
         <h2 style={styles.heading}>Mes dossiers</h2>
         {error && <p style={styles.error}>{error}</p>}
         {complaints.length === 0 ? (
@@ -52,9 +58,28 @@ const MesPlaintes = () => {
                     : complaint.description}
                 </p>
                 <p style={styles.meta}>
-                  <span><strong>Statut :</strong> {complaint.statut}</span> •{" "}
-                  <span><strong>Créée le :</strong>{" "}
-                    {new Date(complaint.date_creation).toLocaleDateString()}</span>
+                  <span style={{
+                    padding: "0.2rem 0.6rem",
+                    borderRadius: "999px",
+                    backgroundColor:
+                      complaint.statut === "en attente" ? "#fef3c7" :
+                      complaint.statut === "en cours" ? "#bfdbfe" :
+                      "#d1fae5",
+                    color:
+                      complaint.statut === "en attente" ? "#92400e" :
+                      complaint.statut === "en cours" ? "#1e40af" :
+                      "#065f46",
+                    fontWeight: "bold",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                  }}>
+                    {complaint.statut}
+                  </span> • {" "}
+                  <span><strong>Créée le :</strong> {new Date(complaint.date_creation).toLocaleDateString("fr-FR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}</span>
                 </p>
                 <button
                   onClick={() => navigate(`/mes-plaintes/${complaint._id}`)}
@@ -77,6 +102,20 @@ const styles = {
     margin: "2rem auto",
     padding: "1rem",
     fontFamily: "sans-serif",
+  },
+  newButtonBox: {
+    textAlign: "right",
+    marginBottom: "1rem",
+  },
+  newButton: {
+    backgroundColor: "#10b981",
+    color: "white",
+    border: "none",
+    padding: "0.6rem 1.2rem",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "0.9rem",
   },
   heading: {
     fontSize: "1.8rem",
@@ -118,6 +157,7 @@ const styles = {
     cursor: "pointer",
     fontSize: "0.9rem",
     fontWeight: "bold",
+    transition: "background-color 0.2s",
   },
   error: {
     color: "red",
