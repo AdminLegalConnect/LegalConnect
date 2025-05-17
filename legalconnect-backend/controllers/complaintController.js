@@ -256,6 +256,72 @@ const getMyComplaints = async (req, res) => {
     });
   }
 };
+// Inviter un participant
+const inviterParticipant = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const participant = await User.findOne({ email });
+
+    if (!participant) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    const plainte = await Complaint.findById(req.params.id);
+    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+
+    // Ne pas ajouter deux fois le même utilisateur
+    if (!plainte.participants.includes(participant._id)) {
+      plainte.participants.push(participant._id);
+      await plainte.save();
+    }
+
+    res.status(200).json({ message: "Participant ajouté", plainte });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+// Mettre à jour la visibilité
+const updateVisibilite = async (req, res) => {
+  try {
+    const { visibilite } = req.body;
+    if (!["publique", "privée"].includes(visibilite)) {
+      return res.status(400).json({ error: "Visibilité invalide" });
+    }
+
+    const plainte = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      { visibilite },
+      { new: true }
+    );
+
+    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+
+    res.status(200).json({ message: "Visibilité mise à jour", plainte });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+const deleteComplaint = async (req, res) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({ error: "Plainte non trouvée" });
+    }
+
+    // Optionnel : Vérifier que l'utilisateur est propriétaire de la plainte
+    if (complaint.utilisateur.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Accès non autorisé" });
+    }
+
+    await complaint.deleteOne();
+    res.status(200).json({ message: "Plainte supprimée avec succès" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
 
 
 module.exports = {
@@ -268,4 +334,7 @@ module.exports = {
   addCoffreFortFile,
   deleteCoffreFortFile,
   getMyComplaints,
+  inviterParticipant,
+  updateVisibilite,
+  deleteComplaint,
 };

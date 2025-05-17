@@ -13,6 +13,9 @@ const {
   addCoffreFortFile,
   deleteCoffreFortFile,
   getMyComplaints,
+  updateVisibilite,
+  inviterParticipant,
+  deleteComplaint,
 } = require("../controllers/complaintController");
 
 // Routes de base pour les plaintes
@@ -21,6 +24,10 @@ router.get("/complaints", authMiddleware, getComplaintsForAvocat);  // Changemen
 router.get("/complaints/:id", authMiddleware, getComplaintById);
 router.put("/complaints/:id", authMiddleware, updateComplaint);
 router.get("/my-complaints", authMiddleware, getMyComplaints);
+router.put("/complaints/:id/visibilite", authMiddleware, updateVisibilite);
+router.post("/complaints/:id/inviter", authMiddleware, inviterParticipant);
+router.delete("/complaints/:id", authMiddleware, deleteComplaint);
+
 
 // Routes pour les fonctionnalités spécifiques
 router.put("/complaints/:id/status", authMiddleware, updateComplaintStatus);

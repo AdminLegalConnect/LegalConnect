@@ -15,6 +15,8 @@ const complaintSchema = new mongoose.Schema({
   description: { type: String, required: true },
   utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   statut: { type: String, enum: ["en cours", "résolue", "fermée"], default: "en cours" },
+  visibilite: { type: String, enum: ["publique", "privée"], default: "privée" },
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   pieces_jointes: { type: [String], default: [] },
   historique_actions: [{
     action: String,

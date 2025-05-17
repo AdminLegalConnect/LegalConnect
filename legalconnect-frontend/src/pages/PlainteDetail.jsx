@@ -19,6 +19,7 @@ const PlainteDetail = () => {
   const [error, setError] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("details");
+  const [emailInvite, setEmailInvite] = useState("");
 
   const fetchComplaint = async () => {
     try {
@@ -52,17 +53,70 @@ const PlainteDetail = () => {
     }
   };
 
-  const handleDeleteFile = async (fileId) => {
-    if (!window.confirm("Supprimer ce fichier définitivement ?")) return;
+  const handleInvite = async () => {
+    if (!emailInvite.trim()) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/complaints/${id}/coffre-fort/${fileId}`, {
+      await axios.post(`http://localhost:5000/api/complaints/${id}/inviter`, { email: emailInvite }, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setSuccess("Participant invité avec succès !");
+      setEmailInvite("");
       fetchComplaint();
     } catch (err) {
       console.error(err);
-      setError("Erreur lors de la suppression du fichier");
+      setError("Erreur lors de l'invitation");
+    }
+  };
+
+  const handleVisibilite = async () => {
+    const nouvelleVisibilite = complaint.visibilite === "publique" ? "privée" : "publique";
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:5000/api/complaints/${id}/visibilite`, { visibilite: nouvelleVisibilite }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess(`Plainte rendue ${nouvelleVisibilite}`);
+      fetchComplaint();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors du changement de visibilité");
+    }
+  };
+
+  const handleDeleteComplaint = async () => {
+    if (!window.confirm("Supprimer définitivement cette plainte ?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/complaints/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      navigate("/mes-plaintes");
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de la suppression de la plainte");
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setSuccess("Lien copié dans le presse-papiers");
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(`http://localhost:5000/api/complaints/${id}/chat`, {
+        message: newMessage.trim(),
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNewMessage("");
+      fetchComplaint();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'envoi du message");
     }
   };
 
@@ -92,20 +146,17 @@ const PlainteDetail = () => {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+  const handleDeleteFile = async (fileId) => {
+    if (!window.confirm("Supprimer ce fichier définitivement ?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.post(`http://localhost:5000/api/complaints/${id}/chat`, {
-        message: newMessage.trim(),
-      }, {
+      await axios.delete(`http://localhost:5000/api/complaints/${id}/coffre-fort/${fileId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setNewMessage("");
       fetchComplaint();
     } catch (err) {
       console.error(err);
-      setError("Erreur lors de l'envoi du message");
+      setError("Erreur lors de la suppression du fichier");
     }
   };
 
@@ -124,6 +175,9 @@ const PlainteDetail = () => {
           <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
         </div>
 
+        {success && <p style={{ color: "green" }}>{success}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
         {activeTab === "details" && (
           <form onSubmit={handleUpdate} style={styles.form}>
             <label>Titre :</label>
@@ -141,7 +195,7 @@ const PlainteDetail = () => {
             {complaint.chat.length === 0 ? <p>Aucun message</p> : (
               complaint.chat.map((msg) => (
                 <div key={msg._id} style={styles.message}>
-                  <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
+                  <strong>{msg.expediteur?.prenom || msg.expediteur?.nom || msg.expediteur?.email || "Utilisateur"}</strong>
                   <p>{msg.message}</p>
                   <small>{new Date(msg.date).toLocaleString()}</small>
                 </div>
@@ -178,8 +232,22 @@ const PlainteDetail = () => {
         )}
 
         {activeTab === "settings" && (
-          <div>
-            <p>🔒 Paramètres à venir : inviter des participants, partager, supprimer...</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div>
+              <label>Inviter un participant :</label><br />
+              <input type="email" placeholder="Email" value={emailInvite} onChange={(e) => setEmailInvite(e.target.value)} style={styles.input} />
+              <button onClick={handleInvite} style={styles.button}>Inviter</button>
+            </div>
+
+            <div>
+              <p>Visibilité actuelle : <strong>{complaint.visibilite}</strong></p>
+              <button onClick={handleVisibilite} style={styles.button}>
+                Rendre {complaint.visibilite === "publique" ? "privée" : "publique"}
+              </button>
+            </div>
+
+            <button onClick={handleCopyLink} style={styles.button}>Partager / Copier le lien</button>
+            <button onClick={handleDeleteComplaint} style={styles.deleteButton}>🗑 Supprimer la plainte</button>
           </div>
         )}
 
@@ -198,7 +266,8 @@ const styles = {
   form: { display: "flex", flexDirection: "column", gap: "1rem" },
   input: { padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" },
   textarea: { padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" },
-  button: { marginTop: "1rem", padding: "0.8rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" },
+  button: { padding: "0.8rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" },
+  deleteButton: { padding: "0.8rem", backgroundColor: "#dc2626", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" },
   back: { marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" },
   chatBox: { display: "flex", flexDirection: "column", gap: "1rem" },
   message: { backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "8px" },
