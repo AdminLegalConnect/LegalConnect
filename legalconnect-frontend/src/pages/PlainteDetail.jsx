@@ -21,20 +21,26 @@ const PlainteDetail = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [emailInvite, setEmailInvite] = useState("");
 
-  const fetchComplaint = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/complaints/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setComplaint(res.data.complaint);
-      setTitre(res.data.complaint.titre);
-      setDescription(res.data.complaint.description);
-    } catch (err) {
-      console.error(err);
-      setError("Impossible de charger la plainte");
-    }
-  };
+ const fetchComplaint = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const url = token
+      ? `http://localhost:5000/api/complaints/${id}`
+      : `http://localhost:5000/api/public-complaints/${id}`;
+
+    const res = await axios.get(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    setComplaint(res.data.complaint);
+    setTitre(res.data.complaint.titre);
+    setDescription(res.data.complaint.description);
+  } catch (err) {
+    console.error(err);
+    setError("Impossible de charger la plainte");
+  }
+};
+
 
   useEffect(() => { fetchComplaint(); }, [id]);
 

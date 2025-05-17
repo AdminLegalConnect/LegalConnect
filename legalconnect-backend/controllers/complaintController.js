@@ -322,6 +322,29 @@ const deleteComplaint = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+const getPublicComplaintById = async (req, res) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id)
+      .populate("utilisateur")
+      .populate("chat.expediteur");
+
+    if (!complaint) {
+      return res.status(404).json({ error: "Plainte non trouvée" });
+    }
+
+    if (complaint.visibilite !== "publique") {
+      return res.status(403).json({ error: "Cette plainte est privée." });
+    }
+
+    res.status(200).json({
+      message: "Plainte publique récupérée avec succès",
+      complaint,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
 
 
 module.exports = {
@@ -337,4 +360,5 @@ module.exports = {
   inviterParticipant,
   updateVisibilite,
   deleteComplaint,
+  getPublicComplaintById,
 };

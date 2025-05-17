@@ -16,6 +16,7 @@ const {
   updateVisibilite,
   inviterParticipant,
   deleteComplaint,
+  getPublicComplaintById,
 } = require("../controllers/complaintController");
 
 // Routes de base pour les plaintes
@@ -27,6 +28,7 @@ router.get("/my-complaints", authMiddleware, getMyComplaints);
 router.put("/complaints/:id/visibilite", authMiddleware, updateVisibilite);
 router.post("/complaints/:id/inviter", authMiddleware, inviterParticipant);
 router.delete("/complaints/:id", authMiddleware, deleteComplaint);
+router.get("/public-complaints/:id", getPublicComplaintById);
 
 
 // Routes pour les fonctionnalités spécifiques
