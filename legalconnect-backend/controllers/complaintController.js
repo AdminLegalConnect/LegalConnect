@@ -1,6 +1,7 @@
 const Complaint = require("../models/complaint");
 const fs = require("fs");
 const path = require("path");
+const User = require("../models/user");
 
 // ✅ Créer une plainte
 const createComplaint = async (req, res) => {
@@ -260,6 +261,11 @@ const getMyComplaints = async (req, res) => {
 const inviterParticipant = async (req, res) => {
   try {
     const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Adresse email manquante" });
+    }
+
     const participant = await User.findOne({ email });
 
     if (!participant) {
@@ -267,19 +273,23 @@ const inviterParticipant = async (req, res) => {
     }
 
     const plainte = await Complaint.findById(req.params.id);
-    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+    if (!plainte) {
+      return res.status(404).json({ error: "Plainte non trouvée" });
+    }
 
-    // Ne pas ajouter deux fois le même utilisateur
+    // Évite les doublons
     if (!plainte.participants.includes(participant._id)) {
       plainte.participants.push(participant._id);
       await plainte.save();
     }
 
-    res.status(200).json({ message: "Participant ajouté", plainte });
+    res.status(200).json({ message: "Participant ajouté avec succès", plainte });
   } catch (err) {
+    console.error("Erreur dans inviterParticipant:", err); // ✅ log utile
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+
 
 // Mettre à jour la visibilité
 const updateVisibilite = async (req, res) => {
@@ -344,6 +354,8 @@ const getPublicComplaintById = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+
+
 
 
 
