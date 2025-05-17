@@ -1,5 +1,5 @@
 // pages/PlainteDetail.jsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
@@ -9,6 +9,13 @@ const PlainteDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {
+  if (messagesEndRef.current) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
 
   const [complaint, setComplaint] = useState(null);
   const [titre, setTitre] = useState("");
@@ -42,6 +49,12 @@ const PlainteDetail = () => {
   };
 
   useEffect(() => { fetchComplaint(); }, [id]);
+
+  useEffect(() => {
+  if (complaint?.chat?.length) {
+    scrollToBottom();
+  }
+}, [complaint?.chat?.length]);
 
   useEffect(() => {
   if (complaint && user) {
@@ -216,10 +229,8 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
     <form onSubmit={handleUpdate} style={styles.form}>
       <label>Titre :</label>
       <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
-
       <label>Description :</label>
       <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
-
       <button type="submit" style={styles.button}>Enregistrer</button>
     </form>
   ) : (
@@ -229,6 +240,7 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
     </div>
   )
 )}
+
 
 
         {activeTab === "chat" && (
@@ -265,6 +277,8 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
           </div>
         );
       })}
+
+       <div ref={messagesEndRef} style={{ height: 1 }} />
     </div>
 
     {user && (
@@ -379,7 +393,53 @@ const styles = {
   back: { marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" },
   chatBox: { display: "flex", flexDirection: "column", gap: "1rem" },
   message: { backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "8px" },
-  uploadButton: { marginTop: "1rem", backgroundColor: "#16a34a", color: "white", border: "none", padding: "0.6rem 1rem", borderRadius: "8px" }
+  uploadButton: { marginTop: "1rem", backgroundColor: "#16a34a", color: "white", border: "none", padding: "0.6rem 1rem", borderRadius: "8px" },
+  chatContainer: {
+  display: "flex",
+  flexDirection: "column",
+  height: "60vh",
+  border: "1px solid #e5e7eb",
+  borderRadius: "10px",
+  overflow: "hidden",
+},
+
+chatMessages: {
+  flex: 1,
+  overflowY: "auto",
+  padding: "1rem",
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.5rem",
+},
+
+chatInputBox: {
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  padding: "1rem",
+  gap: "0.5rem",
+  backgroundColor: "#f9fafb",
+  borderTop: "1px solid #e5e7eb",
+},
+
+chatTextarea: {
+  flex: 1,
+  padding: "0.6rem",
+  borderRadius: "12px",
+  border: "1px solid #ccc",
+  resize: "none",
+  fontSize: "1rem",
+},
+
+chatSendButton: {
+  backgroundColor: "#2563EB",
+  color: "white",
+  border: "none",
+  padding: "0.6rem 1rem",
+  borderRadius: "8px",
+  cursor: "pointer",
+}
+
   
 };
 
