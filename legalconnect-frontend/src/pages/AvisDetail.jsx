@@ -258,9 +258,10 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
   <div style={styles.chatContainer}>
     <div style={styles.chatMessages}>
       {avis.chat.map((msg) => {
-        const expediteur = msg.expediteur;
-        const isCurrentUser = (user?.id || user?._id) === expediteur?._id;
-        const isJuridique = expediteur?.role === "juridique";
+  const auteur = msg.auteurId;
+  const isCurrentUser = (user?.id || user?._id) === auteur?._id;
+  const isJuridique = auteur?.role === "juridique";
+
 
         return (
           <div
@@ -277,9 +278,9 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
             }}
           >
             <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
-              {expediteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
-              {expediteur?.prenom || expediteur?.email} 
-              {expediteur?.role ? ` - ${expediteur.role}` : ""}
+              {auteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
+              {auteur?.prenom || auteur?.email} 
+              {auteur?.role ? ` - ${auteur.role}` : ""}
             </div>
             <div>{msg.message}</div>
             <div style={{ fontSize: "0.75rem", marginTop: "0.5rem", color: "#6b7280" }}>

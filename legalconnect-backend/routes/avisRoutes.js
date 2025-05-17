@@ -19,7 +19,7 @@ const {
 router.post('/avis', authMiddleware, createAvis);
 
 // Route pour ajouter un message au chat de l'avis
-router.post('/avis/chat', authMiddleware, addChatMessage);
+router.post('/avis/:id/chat', authMiddleware, addChatMessage);
 
 // Route pour ajouter un fichier au coffre-fort de l'avis
 router.post('/avis/coffre-fort', authMiddleware, upload.single('fichier'), addCoffreFortFile);

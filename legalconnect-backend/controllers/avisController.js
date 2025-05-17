@@ -31,7 +31,8 @@ const createAvis = async (req, res) => {
 // Ajouter un message au chat de l'avis
 const addChatMessage = async (req, res) => {
   try {
-    const { avisId, texte } = req.body;
+    const avisId = req.params.id;
+    const { texte } = req.body;
 
     const avis = await Avis.findById(avisId);
     if (!avis) return res.status(404).json({ message: "Avis non trouvé." });
@@ -48,6 +49,7 @@ const addChatMessage = async (req, res) => {
     res.status(500).json({ message: "Erreur lors de l'ajout du message", error: err.message });
   }
 };
+
 
 // Ajouter un fichier au coffre-fort
 const addCoffreFortFile = async (req, res) => {
@@ -103,8 +105,7 @@ const getAvisForParticulier = async (req, res) => {
 // Récupérer un avis par ID
 const getAvisById = async (req, res) => {
   try {
-    const avis = await Avis.findById(req.params.id).populate('chat.auteurId', 'email');
-    if (!avis) {
+    const avis = await Avis.findById(req.params.id).populate('chat.auteurId', 'prenom email role');    if (!avis) {
       return res.status(404).json({ message: "Avis non trouvé" });
     }
     res.status(200).json({ avis });
