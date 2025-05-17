@@ -1,8 +1,9 @@
-// pages/MesAvis.jsx
+// MesAvis.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Layout/Header";
 
 const MesAvis = () => {
   const { user } = useContext(AuthContext);
@@ -33,37 +34,40 @@ const MesAvis = () => {
   }, [user, navigate]);
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Mes avis</h2>
-      {error && <p style={styles.error}>{error}</p>}
-      {avisList.length === 0 ? (
-        <p style={styles.info}>Vous n’avez encore déposé aucun avis.</p>
-      ) : (
-        <ul style={styles.list}>
-          {avisList.map((avis) => (
-            <li key={avis._id} style={styles.item}>
-              <strong style={styles.title}>{avis.titre}</strong>
-              <p style={styles.desc}>
-                {avis.description.length > 80
-                  ? avis.description.slice(0, 80) + "..."
-                  : avis.description}
-              </p>
-              <p style={styles.meta}>
-                <span><strong>Statut :</strong> {avis.statut}</span> •{" "}
-                <span><strong>Déposé le :</strong>{" "}
-                  {new Date(avis.dateDepot).toLocaleDateString()}</span>
-              </p>
-              <button
-                onClick={() => navigate(`/mes-avis/${avis._id}`)}
-                style={styles.button}
-              >
-                Voir
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Mes avis</h2>
+        {error && <p style={styles.error}>{error}</p>}
+        {avisList.length === 0 ? (
+          <p style={styles.info}>Vous n’avez encore déposé aucun avis.</p>
+        ) : (
+          <ul style={styles.list}>
+            {avisList.map((avis) => (
+              <li key={avis._id} style={styles.item}>
+                <strong style={styles.title}>{avis.titre}</strong>
+                <p style={styles.desc}>
+                  {avis.description.length > 80
+                    ? avis.description.slice(0, 80) + "..."
+                    : avis.description}
+                </p>
+                <p style={styles.meta}>
+                  <span><strong>Statut :</strong> {avis.statut}</span> •{" "}
+                  <span><strong>Déposé le :</strong>{" "}
+                    {new Date(avis.dateDepot).toLocaleDateString()}</span>
+                </p>
+                <button
+                  onClick={() => navigate(`/mes-avis/${avis._id}`)}
+                  style={styles.button}
+                >
+                  Voir
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 };
 

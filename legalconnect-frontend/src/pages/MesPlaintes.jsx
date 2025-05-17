@@ -1,7 +1,9 @@
+// pages/MesPlaintes.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Layout/Header";
 
 const MesPlaintes = () => {
   const { user } = useContext(AuthContext);
@@ -32,37 +34,40 @@ const MesPlaintes = () => {
   }, [user, navigate]);
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Mes dossiers</h2>
-      {error && <p style={styles.error}>{error}</p>}
-      {complaints.length === 0 ? (
-        <p style={styles.info}>Vous n’avez encore déposé aucune plainte.</p>
-      ) : (
-        <ul style={styles.list}>
-          {complaints.map((complaint) => (
-            <li key={complaint._id} style={styles.item}>
-              <strong style={styles.title}>{complaint.titre}</strong>
-              <p style={styles.desc}>
-                {complaint.description.length > 80
-                  ? complaint.description.slice(0, 80) + "..."
-                  : complaint.description}
-              </p>
-              <p style={styles.meta}>
-                <span><strong>Statut :</strong> {complaint.statut}</span> •{" "}
-                <span><strong>Créée le :</strong>{" "}
-                  {new Date(complaint.date_creation).toLocaleDateString()}</span>
-              </p>
-              <button
-                onClick={() => navigate(`/mes-plaintes/${complaint._id}`)}
-                style={styles.button}
-              >
-                Voir
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Mes dossiers</h2>
+        {error && <p style={styles.error}>{error}</p>}
+        {complaints.length === 0 ? (
+          <p style={styles.info}>Vous n’avez encore déposé aucune plainte.</p>
+        ) : (
+          <ul style={styles.list}>
+            {complaints.map((complaint) => (
+              <li key={complaint._id} style={styles.item}>
+                <strong style={styles.title}>{complaint.titre}</strong>
+                <p style={styles.desc}>
+                  {complaint.description.length > 80
+                    ? complaint.description.slice(0, 80) + "..."
+                    : complaint.description}
+                </p>
+                <p style={styles.meta}>
+                  <span><strong>Statut :</strong> {complaint.statut}</span> •{" "}
+                  <span><strong>Créée le :</strong>{" "}
+                    {new Date(complaint.date_creation).toLocaleDateString()}</span>
+                </p>
+                <button
+                  onClick={() => navigate(`/mes-plaintes/${complaint._id}`)}
+                  style={styles.button}
+                >
+                  Voir
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 };
 

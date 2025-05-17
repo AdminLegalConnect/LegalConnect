@@ -1,3 +1,4 @@
+// Header.jsx
 import React, { useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
@@ -15,7 +16,7 @@ const Header = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer}>
+      <div style={styles.logoContainer} onClick={() => navigate("/dashboard")}>
         <img src={logo} alt="LegalConnect" style={styles.logo} />
         <span style={styles.logoText}>LegalConnect</span>
       </div>
@@ -23,6 +24,7 @@ const Header = () => {
       <div style={styles.navLinks}>
         {user && (
           <>
+            <Link to="/dashboard" style={styles.link}>Dashboard</Link>
             <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
             <Link to="/mes-avis" style={styles.link}>Mes avis</Link>
           </>
@@ -42,11 +44,15 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     borderBottom: "2px solid #3b82f6",
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
   },
   logoContainer: {
     display: "flex",
     alignItems: "center",
     gap: "0.5rem",
+    cursor: "pointer",
   },
   logo: {
     width: "32px",
@@ -60,6 +66,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "1rem",
+    flexWrap: "wrap",
   },
   link: {
     color: "white",
