@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer} onClick={() => navigate("/dashboard")}>
+      <div style={styles.logoContainer} onClick={() => navigate("/dashboard")}> 
         <img src={logo} alt="LegalConnect" style={styles.logo} />
         <span style={styles.logoText}>LegalConnect</span>
       </div>
@@ -58,6 +58,7 @@ const styles = {
   logo: {
     width: "36px",
     height: "36px",
+    borderRadius: "50%",
   },
   logoText: {
     fontSize: "1.4rem",

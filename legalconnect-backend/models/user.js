@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   telephone: { type: String },
   ville: { type: String },
   siteInternet: { type: String }, // <= NOUVEAU
+  photo: { type: String }, // Chemin relatif vers l'image
   notes: [
     {
       auteurId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

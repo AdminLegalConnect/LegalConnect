@@ -127,6 +127,22 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const uploadProfilePhoto = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+
+    if (!req.file) return res.status(400).json({ error: "Aucune photo reçue." });
+
+    user.photo = `/uploads/${req.file.filename}`;
+    await user.save();
+
+    res.status(200).json({ message: "Photo de profil mise à jour.", profil: user });
+  } catch (err) {
+    console.error("Erreur lors du téléchargement de la photo :", err);
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
 
 module.exports = {
   getProfile,
@@ -134,5 +150,6 @@ module.exports = {
   changePassword,
   ajouterNote,
   deleteAccount,
-  ajouterCommentaire
+  ajouterCommentaire,
+  uploadProfilePhoto, // 👈 assure-toi de l'exporter ici
 };

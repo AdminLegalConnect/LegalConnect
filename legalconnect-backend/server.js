@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -24,6 +25,7 @@ app.use("/api", profilRoutes);    // Routes pour le profil utilisateur
 app.use("/api", complaintRoutes); // Routes pour les plaintes
 app.use("/api", homeRoutes);      // Routes d'accueil
 app.use("/api", avisRoutes);      // Routes pour les avis
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // Connexion MongoDB

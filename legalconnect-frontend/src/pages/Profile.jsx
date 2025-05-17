@@ -33,57 +33,81 @@ const Profile = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.put("http://localhost:5000/api/profil/photo", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setProfile(res.data.profil);
+      setSuccess("Photo mise à jour avec succès !");
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'envoi de la photo.");
+    }
+  };
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem("token");
-
-    // Exclure les champs interdits (comme le role)
-    const { nom, prenom, email, telephone, ville, specialite, siteInternet } = form;
-
-    const res = await axios.put(
-      "http://localhost:5000/api/profil",
-      { nom, prenom, email, telephone, ville, specialite, siteInternet },
-      {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const { nom, prenom, email, telephone, ville, specialite, siteInternet } = form;
+      const res = await axios.put("http://localhost:5000/api/profil", { nom, prenom, email, telephone, ville, specialite, siteInternet }, {
         headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+      });
 
-    setSuccess("Profil mis à jour avec succès !");
-    setError("");
-    setProfile(res.data.profil);
-  } catch (err) {
-    setError("Erreur lors de la mise à jour du profil");
-    setSuccess("");
-  }
-};
-
+      setSuccess("Profil mis à jour avec succès !");
+      setError("");
+      setProfile(res.data.profil);
+    } catch (err) {
+      setError("Erreur lors de la mise à jour du profil");
+      setSuccess("");
+    }
+  };
 
   const handleDeleteAccount = async () => {
-  if (!window.confirm("Confirmez-vous la suppression de votre compte ?")) return;
-
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete("http://localhost:5000/api/profil", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/");
-  } catch (err) {
-    setError("Erreur lors de la suppression du compte");
-  }
-};
-
+    if (!window.confirm("Confirmez-vous la suppression de votre compte ?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete("http://localhost:5000/api/profil", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      localStorage.removeItem("token");
+      setUser(null);
+      navigate("/");
+    } catch (err) {
+      setError("Erreur lors de la suppression du compte");
+    }
+  };
 
   return (
     <>
       <Header />
       <div style={styles.container}>
         <h2 style={styles.heading}>Mon profil</h2>
+        {profile?.photo && (
+          <img
+            src={`http://localhost:5000${profile.photo}`}
+            alt="Photo de profil"
+            style={styles.avatar}
+          />
+        )}
+        <input type="file" accept="image/*" onChange={handlePhotoChange} style={styles.fileInput} />
+
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}
+
         <form onSubmit={handleSubmit} style={styles.form}>
           <input type="text" name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} required style={styles.input} />
           <input type="text" name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} required style={styles.input} />
@@ -153,6 +177,18 @@ const styles = {
   },
   success: {
     color: "green",
+  },
+  avatar: {
+    width: "120px",
+    height: "120px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    margin: "0 auto 1rem",
+    display: "block",
+    border: "2px solid #ccc",
+  },
+  fileInput: {
+    marginBottom: "1rem",
   },
 };
 
