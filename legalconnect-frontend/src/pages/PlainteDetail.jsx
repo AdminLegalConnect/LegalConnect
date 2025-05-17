@@ -341,11 +341,14 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
             </div>
 
             <div>
-              <p>Visibilité actuelle : <strong>{complaint.visibilite}</strong></p>
-              <button onClick={handleVisibilite} style={styles.button}>
-                Rendre {complaint.visibilite === "publique" ? "privée" : "publique"}
-              </button>
-            </div>
+  <p>Visibilité actuelle : <strong>{complaint.visibilite}</strong></p>
+  {isCreator && (
+    <button onClick={handleVisibilite} style={styles.button}>
+      Rendre {complaint.visibilite === "publique" ? "privée" : "publique"}
+    </button>
+  )}
+</div>
+
 
             {complaint.utilisateur && (
               <div>
