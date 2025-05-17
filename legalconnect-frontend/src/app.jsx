@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./components/Login/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import DeposerPlainte from "./pages/DeposerPlainte";
 import MesPlaintes from "./pages/MesPlaintes";
@@ -16,6 +17,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/deposer-plainte" element={<DeposerPlainte />} />
       <Route path="/mes-plaintes" element={<MesPlaintes />} />
