@@ -134,10 +134,10 @@ const avisDetail = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(`http://localhost:5000/api/avis/${id}/chat`, {
-        message: newMessage.trim(),
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  texte: newMessage.trim(),
+}, {
+  headers: { Authorization: `Bearer ${token}` },
+});
       setNewMessage("");
       fetchavis();
     } catch (err) {
@@ -282,7 +282,7 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
               {auteur?.prenom?.trim() ? auteur.prenom : auteur?.email}
               {auteur?.role ? ` - ${auteur.role}` : ""}
             </div>
-            <div>{msg.message}</div>
+            <div>{msg.texte}</div>
             <div style={{ fontSize: "0.75rem", marginTop: "0.5rem", color: "#6b7280" }}>
               {new Date(msg.date).toLocaleString("fr-FR")}
             </div>
