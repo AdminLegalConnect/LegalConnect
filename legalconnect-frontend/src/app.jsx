@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import DeposerPlainte from "./pages/DeposerPlainte";
 import MesPlaintes from "./pages/MesPlaintes";
 import PlainteDetail from "./pages/PlainteDetail";
+import Profile from "./pages/Profile"; // assure-toi que ce fichier existe bien
 
 // 👉 nouvelles pages
 import DeposerAvis from "./pages/DeposerAvis";
@@ -19,6 +20,7 @@ function App() {
       <Route path="/deposer-plainte" element={<DeposerPlainte />} />
       <Route path="/mes-plaintes" element={<MesPlaintes />} />
       <Route path="/mes-plaintes/:id" element={<PlainteDetail />} />
+      <Route path="/profil" element={<Profile />} />
       
       {/* ✅ nouvelles routes */}
       <Route path="/deposer-dossier" element={<DeposerAvis />} />

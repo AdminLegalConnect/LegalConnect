@@ -27,6 +27,7 @@ const Header = () => {
             <Link to="/dashboard" style={styles.link}>Dashboard</Link>
             <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
             <Link to="/mes-avis" style={styles.link}>Mes avis</Link>
+            <Link to="/profil" style={styles.link}>Mon profil</Link> {/* 🔥 Lien ajouté ici */}
           </>
         )}
         <button onClick={handleLogout} style={styles.logoutButton}>Déconnexion</button>
