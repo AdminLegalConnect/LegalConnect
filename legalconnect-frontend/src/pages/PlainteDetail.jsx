@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header"; // Ajout du Header
+import Header from "../components/Layout/Header";
 
 const PlainteDetail = () => {
   const { id } = useParams();
@@ -18,6 +18,7 @@ const PlainteDetail = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [newMessage, setNewMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("details");
 
   const fetchComplaint = async () => {
     try {
@@ -114,129 +115,94 @@ const PlainteDetail = () => {
     <>
       <Header />
       <div style={styles.container}>
-        <h2 style={styles.heading}>Détail de la plainte</h2>
+        <h2 style={styles.heading}>Plainte : {complaint.titre}</h2>
 
-        {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
-
-        <form onSubmit={handleUpdate} style={styles.form}>
-          <label>Titre :</label>
-          <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
-
-          <label>Description :</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
-
-          <button type="submit" style={styles.button}>Enregistrer les modifications</button>
-        </form>
-
-        <div style={styles.coffreContainer}>
-          <h3>Fichiers du coffre-fort :</h3>
-          {complaint.coffre_fort.length === 0 ? (
-            <p style={styles.info}>Aucun fichier joint.</p>
-          ) : (
-            <ul style={styles.fileList}>
-              {complaint.coffre_fort.map((file) => (
-                <li key={file._id} style={styles.fileItem}>
-                  <a href={`http://localhost:5000${file.url}`} target="_blank" rel="noopener noreferrer" style={styles.link}>
-                    {file.nom_fichier}
-                  </a>
-                  <span style={styles.meta}>({file.type} – {new Date(file.date_upload).toLocaleDateString()})</span>
-                  <button onClick={() => handleDeleteFile(file._id)} style={styles.deleteButton} title="Supprimer">🗑</button>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div style={styles.tabBar}>
+          <button onClick={() => setActiveTab("details")} style={activeTab === "details" ? styles.activeTab : styles.tab}>Détails</button>
+          <button onClick={() => setActiveTab("chat")} style={activeTab === "chat" ? styles.activeTab : styles.tab}>Chat</button>
+          <button onClick={() => setActiveTab("files")} style={activeTab === "files" ? styles.activeTab : styles.tab}>Coffre-fort</button>
+          <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
         </div>
 
-        <div style={{ marginTop: "2rem" }}>
-          <h3>Ajouter de nouveaux fichiers :</h3>
-          <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
-          {newFiles.length > 0 && (
-            <ul style={styles.fileList}>
-              {newFiles.map((file, i) => <li key={i} style={styles.fileItem}>{file.name}</li>)}
-            </ul>
-          )}
-          <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
-            {uploading ? "Téléversement..." : "Ajouter au coffre-fort"}
-          </button>
-        </div>
+        {activeTab === "details" && (
+          <form onSubmit={handleUpdate} style={styles.form}>
+            <label>Titre :</label>
+            <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
 
-        <div style={{ marginTop: "3rem" }}>
-          <h3>Discussion :</h3>
+            <label>Description :</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
+
+            <button type="submit" style={styles.button}>Enregistrer</button>
+          </form>
+        )}
+
+        {activeTab === "chat" && (
           <div style={styles.chatBox}>
-            {complaint.chat.length === 0 ? (
-              <p style={styles.info}>Aucun message pour le moment.</p>
-            ) : (
-              complaint.chat.map((msg) => {
-                const isParticulier = msg.expediteur?.role === "particulier";
-                return (
-                  <div
-                    key={msg._id}
-                    style={{
-                      ...styles.message,
-                      alignSelf: isParticulier ? "flex-end" : "flex-start",
-                      backgroundColor: isParticulier ? "#dbeafe" : "#f3f4f6",
-                    }}
-                  >
-                    <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
-                    {msg.expediteur?.role && (
-                      <span
-                        style={{
-                          ...styles.tag,
-                          backgroundColor: isParticulier ? "#a5b4fc" : "#cbd5e1",
-                          color: isParticulier ? "#1e3a8a" : "#374151",
-                        }}
-                      >
-                        {msg.expediteur.role}
-                      </span>
-                    )}
-                    <p>{msg.message}</p>
-                    <small>{new Date(msg.date).toLocaleString()}</small>
-                  </div>
-                );
-              })
+            {complaint.chat.length === 0 ? <p>Aucun message</p> : (
+              complaint.chat.map((msg) => (
+                <div key={msg._id} style={styles.message}>
+                  <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
+                  <p>{msg.message}</p>
+                  <small>{new Date(msg.date).toLocaleString()}</small>
+                </div>
+              ))
             )}
+            <textarea
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              rows={3}
+              placeholder="Votre message..."
+              style={styles.textarea}
+            />
+            <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
           </div>
+        )}
 
-          <textarea
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            rows={3}
-            placeholder="Votre message..."
-            style={styles.textarea}
-          />
-          <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
-        </div>
+        {activeTab === "files" && (
+          <div>
+            <h3>Fichiers :</h3>
+            {complaint.coffre_fort.length === 0 ? <p>Aucun fichier</p> : (
+              <ul>
+                {complaint.coffre_fort.map((file) => (
+                  <li key={file._id}>
+                    <a href={`http://localhost:5000${file.url}`} target="_blank" rel="noopener noreferrer">{file.nom_fichier}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
+            <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
+              {uploading ? "Envoi..." : "Ajouter fichier"}
+            </button>
+          </div>
+        )}
 
-        <button onClick={() => navigate("/mes-plaintes")} style={styles.back}>
-          ⬅ Retour à mes plaintes
-        </button>
+        {activeTab === "settings" && (
+          <div>
+            <p>🔒 Paramètres à venir : inviter des participants, partager, supprimer...</p>
+          </div>
+        )}
+
+        <button onClick={() => navigate("/mes-plaintes")} style={styles.back}>⬅ Retour</button>
       </div>
     </>
   );
 };
 
 const styles = {
-  container: { maxWidth: "600px", margin: "2rem auto", padding: "2rem", fontFamily: "sans-serif" },
-  heading: { fontSize: "1.5rem", marginBottom: "1rem" },
-  form: { display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" },
-  input: { padding: "0.6rem", fontSize: "1rem", borderRadius: "8px", border: "1px solid #ccc" },
-  textarea: { padding: "0.6rem", fontSize: "1rem", borderRadius: "8px", border: "1px solid #ccc" },
-  button: { padding: "0.8rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" },
-  back: { marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer", fontWeight: "bold" },
-  error: { color: "red" },
-  success: { color: "green" },
-  coffreContainer: { marginTop: "1rem" },
-  fileList: { listStyle: "none", padding: 0, marginTop: "0.5rem" },
-  fileItem: { marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" },
-  link: { color: "#1d4ed8", textDecoration: "underline" },
-  meta: { fontSize: "0.85rem", color: "#6b7280" },
-  deleteButton: { background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1rem" },
-  uploadButton: { marginTop: "1rem", padding: "0.6rem 1rem", backgroundColor: "#16a34a", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", fontSize: "1rem" },
-  info: { fontStyle: "italic", color: "#555" },
-  chatBox: { marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "300px", overflowY: "auto" },
-  message: { padding: "1rem", borderRadius: "12px", maxWidth: "80%", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", fontSize: "0.95rem" },
-  tag: { marginLeft: "0.5rem", fontSize: "0.75rem", padding: "2px 6px", borderRadius: "6px", fontWeight: "bold" },
+  container: { maxWidth: "700px", margin: "2rem auto", padding: "2rem" },
+  heading: { fontSize: "1.8rem", marginBottom: "1rem" },
+  tabBar: { display: "flex", gap: "1rem", marginBottom: "1rem" },
+  tab: { padding: "0.5rem 1rem", backgroundColor: "#e5e7eb", border: "none", borderRadius: "6px", cursor: "pointer" },
+  activeTab: { padding: "0.5rem 1rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" },
+  form: { display: "flex", flexDirection: "column", gap: "1rem" },
+  input: { padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" },
+  textarea: { padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" },
+  button: { marginTop: "1rem", padding: "0.8rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" },
+  back: { marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" },
+  chatBox: { display: "flex", flexDirection: "column", gap: "1rem" },
+  message: { backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "8px" },
+  uploadButton: { marginTop: "1rem", backgroundColor: "#16a34a", color: "white", border: "none", padding: "0.6rem 1rem", borderRadius: "8px" }
 };
 
 export default PlainteDetail;
