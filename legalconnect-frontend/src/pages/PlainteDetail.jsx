@@ -268,6 +268,12 @@ const PlainteDetail = () => {
               </button>
             </div>
 
+            {complaint.utilisateur && (
+  <div>
+    <p><strong>Créateur :</strong> {complaint.utilisateur.prenom || complaint.utilisateur.email}</p>
+  </div>
+)}
+
             {complaint.participants && complaint.participants.length > 0 && (
               <div>
                 <p><strong>Participants :</strong></p>
