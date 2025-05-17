@@ -10,8 +10,11 @@ const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", ville: "", specialite: "", siteInternet: "" });
+  const [passwordForm, setPasswordForm] = useState({ ancienMotDePasse: "", nouveauMotDePasse: "" });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -76,6 +79,22 @@ const Profile = () => {
     }
   };
 
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put("http://localhost:5000/api/profil/motdepasse", passwordForm, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPasswordSuccess("Mot de passe mis à jour avec succès.");
+      setPasswordError("");
+      setPasswordForm({ ancienMotDePasse: "", nouveauMotDePasse: "" });
+    } catch (err) {
+      setPasswordError("Erreur lors du changement de mot de passe.");
+      setPasswordSuccess("");
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (!window.confirm("Confirmez-vous la suppression de votre compte ?")) return;
     try {
@@ -117,6 +136,15 @@ const Profile = () => {
           <input type="text" name="specialite" placeholder="Spécialité" value={form.specialite || ""} onChange={handleChange} style={styles.input} />
           <input type="url" name="siteInternet" placeholder="Site Internet" value={form.siteInternet || ""} onChange={handleChange} style={styles.input} />
           <button type="submit" style={styles.button}>Enregistrer</button>
+        </form>
+
+        <h3 style={{ marginTop: "2rem", color: "#1e3a8a" }}>Changer de mot de passe</h3>
+        {passwordError && <p style={styles.error}>{passwordError}</p>}
+        {passwordSuccess && <p style={styles.success}>{passwordSuccess}</p>}
+        <form onSubmit={handlePasswordChange} style={styles.form}>
+          <input type="password" name="ancienMotDePasse" placeholder="Ancien mot de passe" value={passwordForm.ancienMotDePasse} onChange={(e) => setPasswordForm({ ...passwordForm, ancienMotDePasse: e.target.value })} style={styles.input} required />
+          <input type="password" name="nouveauMotDePasse" placeholder="Nouveau mot de passe" value={passwordForm.nouveauMotDePasse} onChange={(e) => setPasswordForm({ ...passwordForm, nouveauMotDePasse: e.target.value })} style={styles.input} required />
+          <button type="submit" style={styles.button}>Modifier le mot de passe</button>
         </form>
 
         <button onClick={handleDeleteAccount} style={styles.deleteButton}>Supprimer mon compte</button>
