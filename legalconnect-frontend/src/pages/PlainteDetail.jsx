@@ -214,7 +214,15 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
 
         <div style={styles.tabBar}>
           <button onClick={() => setActiveTab("details")} style={activeTab === "details" ? styles.activeTab : styles.tab}>Détails</button>
-          <button onClick={() => setActiveTab("chat")} style={activeTab === "chat" ? styles.activeTab : styles.tab}>Chat</button>
+          <button
+    onClick={() => {
+      setActiveTab("chat");
+      setTimeout(() => scrollToBottom(), 100);
+    }}
+    style={activeTab === "chat" ? styles.activeTab : styles.tab}
+  >
+    Chat
+  </button>
           <button onClick={() => setActiveTab("files")} style={activeTab === "files" ? styles.activeTab : styles.tab}>Coffre-fort</button>
           {user && (
             <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
