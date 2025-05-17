@@ -25,6 +25,7 @@ app.use("/api", complaintRoutes); // Routes pour les plaintes
 app.use("/api", homeRoutes);      // Routes d'accueil
 app.use("/api", avisRoutes);      // Routes pour les avis
 
+
 // Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI, {})
   .then(() => {

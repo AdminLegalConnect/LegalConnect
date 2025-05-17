@@ -8,12 +8,12 @@ const createAvis = async (req, res) => {
     const { titre, description, chat, coffreFort, statut } = req.body;
 
     const avis = new Avis({
-      utilisateurId: req.user.id,  // Utilisateur connecté
+      utilisateurId: req.user.id,
       titre,
       description,
-      chat,  // Messages du chat associés à l'avis
-      coffreFort,  // Fichiers associés à l'avis
-      statut: statut || "en attente",  // Statut par défaut "en attente"
+      chat,
+      coffreFort,
+      statut: statut || "en attente",
     });
 
     await avis.save();
@@ -33,13 +33,11 @@ const addChatMessage = async (req, res) => {
   try {
     const { avisId, texte } = req.body;
 
-    // Trouver l'avis
     const avis = await Avis.findById(avisId);
     if (!avis) return res.status(404).json({ message: "Avis non trouvé." });
 
-    // Ajouter le message au chat
     avis.chat.push({
-      auteurId: req.user.id,  // Utilisateur qui envoie le message
+      auteurId: req.user.id,
       texte
     });
 
@@ -51,23 +49,20 @@ const addChatMessage = async (req, res) => {
   }
 };
 
-// Ajouter un fichier au coffre-fort de l'avis
+// Ajouter un fichier au coffre-fort
 const addCoffreFortFile = async (req, res) => {
   try {
     const { avisId, description } = req.body;
 
-    // Vérifier si un fichier est présent dans la requête
     if (!req.file) {
       return res.status(400).json({ message: "Aucun fichier téléchargé." });
     }
 
-    // Trouver l'avis en utilisant l'ID
     const avis = await Avis.findById(avisId);
     if (!avis) return res.status(404).json({ message: "Avis non trouvé." });
 
-    // Ajouter le fichier au coffre-fort
     avis.coffreFort.push({
-      fichier: req.file.path,  // Enregistrer le chemin du fichier téléchargé
+      fichier: req.file.path,
       description
     });
 
@@ -79,24 +74,36 @@ const addCoffreFortFile = async (req, res) => {
   }
 };
 
-// Nouvelle fonction pour récupérer les avis des particuliers
+// Récupérer les avis de l'utilisateur connecté
+const getAvisByUser = async (req, res) => {
+  try {
+    const avis = await Avis.find({ utilisateurId: req.user.id });
+    res.status(200).json({ avis });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Récupérer les avis pour un avocat
 const getAvisForParticulier = async (req, res) => {
   try {
-    // Vérifier si l'utilisateur est bien un avocat
     const user = await User.findById(req.user.id);
     if (user.role !== "juridique") {
       return res.status(403).json({ message: "Accès interdit : vous devez être un avocat pour consulter les avis." });
     }
 
-    // Récupérer tous les avis déposés par des particuliers
-    const avis = await Avis.find({ utilisateurId: { $ne: req.user.id } });  // Exclure les avis créés par l'avocat
-    res.status(200).json({
-      message: "Avis des particuliers récupérés avec succès.",
-      avis,
-    });
+    const avis = await Avis.find({ utilisateurId: { $ne: req.user.id } });
+    res.status(200).json({ message: "Avis des particuliers récupérés avec succès.", avis });
   } catch (err) {
     res.status(500).json({ message: "Erreur lors de la récupération des avis.", error: err.message });
   }
 };
 
-module.exports = { createAvis, addChatMessage, addCoffreFortFile, getAvisForParticulier };
+module.exports = {
+  createAvis,
+  addChatMessage,
+  addCoffreFortFile,
+  getAvisByUser,             // ✅ bien exportée
+  getAvisForParticulier
+};
