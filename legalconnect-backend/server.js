@@ -10,6 +10,8 @@ const profilRoutes = require("./routes/profil"); // Ajout des routes de profil
 const complaintRoutes = require("./routes/complaintRoutes"); // Ajout des routes pour les plaintes
 const homeRoutes = require("./routes/homeRoutes"); // Ajout des routes pour l'accueil
 const avisRoutes = require("./routes/avisRoutes"); // Routes pour les avis
+const forumRoutes = require("./routes/forumRoutes");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +28,7 @@ app.use("/api", complaintRoutes); // Routes pour les plaintes
 app.use("/api", homeRoutes);      // Routes d'accueil
 app.use("/api", avisRoutes);      // Routes pour les avis
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api", forumRoutes);
 
 
 // Connexion MongoDB

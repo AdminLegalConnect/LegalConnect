@@ -7,6 +7,8 @@ import DeposerPlainte from "./pages/DeposerPlainte";
 import MesPlaintes from "./pages/MesPlaintes";
 import PlainteDetail from "./pages/PlainteDetail";
 import Profile from "./pages/Profile"; // assure-toi que ce fichier existe bien
+import Forum from "./pages/Forum"; // adapte le chemin si nécessaire
+
 
 // 👉 nouvelles pages
 import DeposerAvis from "./pages/DeposerAvis";
@@ -30,6 +32,8 @@ function App() {
       <Route path="/mes-avis/:id" element={<AvisDetail />} />
       <Route path="/deposer-avis" element={<DeposerAvis />} />
       <Route path="/mes-avis/:id" element={<AvisDetail />} />
+      <Route path="/thematiques" element={<Forum />} />
+
 
 
     </Routes>
