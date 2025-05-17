@@ -279,7 +279,7 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
           >
             <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
               {auteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
-              {auteur?.prenom || auteur?.email} 
+              {auteur?.prenom?.trim() ? auteur.prenom : auteur?.email}
               {auteur?.role ? ` - ${auteur.role}` : ""}
             </div>
             <div>{msg.message}</div>

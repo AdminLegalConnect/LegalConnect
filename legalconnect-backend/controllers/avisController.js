@@ -44,7 +44,9 @@ const addChatMessage = async (req, res) => {
 
     await avis.save();
 
-    res.status(200).json({ message: "Message ajouté au chat de l'avis.", avis });
+    await avis.populate('chat.auteurId', 'prenom email role');
+res.status(200).json({ message: "Message ajouté au chat de l'avis.", avis });
+
   } catch (err) {
     res.status(500).json({ message: "Erreur lors de l'ajout du message", error: err.message });
   }
