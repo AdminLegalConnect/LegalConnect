@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import Header from "../components/Layout/Header"; // 👈 ajout du header
 
 const DeposerPlainte = () => {
   const { user } = useContext(AuthContext);
@@ -9,7 +10,7 @@ const DeposerPlainte = () => {
 
   const [titre, setTitre] = useState("");
   const [description, setDescription] = useState("");
-  const [files, setFiles] = useState([]); // 👈 multiple fichiers
+  const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -19,20 +20,16 @@ const DeposerPlainte = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // Étape 1 : créer la plainte
       const res = await axios.post(
         "http://localhost:5000/api/complaints",
         { titre, description },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       const plainteId = res.data.complaint._id;
 
-      // Étape 2 : envoyer chaque fichier
       if (files.length > 0) {
         for (const file of files) {
           const formData = new FormData();
@@ -64,45 +61,48 @@ const DeposerPlainte = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Déposer une plainte</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Titre de la plainte"
-          value={titre}
-          onChange={(e) => setTitre(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <textarea
-          placeholder="Description détaillée"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={6}
-          style={styles.textarea}
-        />
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files))}
-          style={styles.input}
-        />
-        {files.length > 0 && (
-          <ul>
-            {files.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
-        )}
-        {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
-        <button type="submit" style={styles.button}>
-          Envoyer
-        </button>
-      </form>
-    </div>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Déposer une plainte</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="text"
+            placeholder="Titre de la plainte"
+            value={titre}
+            onChange={(e) => setTitre(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <textarea
+            placeholder="Description détaillée"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            rows={6}
+            style={styles.textarea}
+          />
+          <input
+            type="file"
+            multiple
+            onChange={(e) => setFiles(Array.from(e.target.files))}
+            style={styles.input}
+          />
+          {files.length > 0 && (
+            <ul>
+              {files.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+          )}
+          {error && <p style={styles.error}>{error}</p>}
+          {success && <p style={styles.success}>{success}</p>}
+          <button type="submit" style={styles.button}>
+            Envoyer
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 

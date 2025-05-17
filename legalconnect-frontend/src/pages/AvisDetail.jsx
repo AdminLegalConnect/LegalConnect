@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import Header from "../components/Layout/Header"; // Ajout du Header
 
 const AvisDetail = () => {
   const { id } = useParams();
@@ -84,76 +85,79 @@ const AvisDetail = () => {
   if (!avis) return <p style={{ padding: "2rem" }}>Chargement...</p>;
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Détail de l'avis</h2>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Détail de l'avis</h2>
 
-      {error && <p style={styles.error}>{error}</p>}
-      {success && <p style={styles.success}>{success}</p>}
+        {error && <p style={styles.error}>{error}</p>}
+        {success && <p style={styles.success}>{success}</p>}
 
-      <p><strong>Titre :</strong> {titre}</p>
-      <p><strong>Description :</strong> {description}</p>
+        <p><strong>Titre :</strong> {titre}</p>
+        <p><strong>Description :</strong> {description}</p>
 
-      <div style={styles.coffreContainer}>
-        <h3>Fichiers :</h3>
-        {avis.coffreFort.length === 0 ? (
-          <p style={styles.info}>Aucun fichier.</p>
-        ) : (
-          <ul style={styles.fileList}>
-            {avis.coffreFort.map((file, i) => (
-              <li key={i} style={styles.fileItem}>
-                <a href={`http://localhost:5000/${file.fichier}`} target="_blank" rel="noreferrer" style={styles.link}>
-                  {file.fichier.split("/").pop()}
-                </a>
-                <span style={styles.meta}>{new Date(file.dateAjout).toLocaleDateString()}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div style={{ marginTop: "2rem" }}>
-        <h3>Ajouter des fichiers :</h3>
-        <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
-        {newFiles.length > 0 && (
-          <ul style={styles.fileList}>
-            {newFiles.map((file, i) => <li key={i} style={styles.fileItem}>{file.name}</li>)}
-          </ul>
-        )}
-        <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
-          {uploading ? "Envoi..." : "Ajouter"}
-        </button>
-      </div>
-
-      <div style={{ marginTop: "3rem" }}>
-        <h3>Chat :</h3>
-        <div style={styles.chatBox}>
-          {avis.chat.length === 0 ? (
-            <p style={styles.info}>Aucun message.</p>
+        <div style={styles.coffreContainer}>
+          <h3>Fichiers :</h3>
+          {avis.coffreFort.length === 0 ? (
+            <p style={styles.info}>Aucun fichier.</p>
           ) : (
-            avis.chat.map((msg, i) => (
-              <div key={i} style={styles.message}>
-                <strong>{msg.auteurId?.email || "Utilisateur"}</strong>
-                <p>{msg.texte}</p>
-                <small>{new Date(msg.date).toLocaleString()}</small>
-              </div>
-            ))
+            <ul style={styles.fileList}>
+              {avis.coffreFort.map((file, i) => (
+                <li key={i} style={styles.fileItem}>
+                  <a href={`http://localhost:5000/${file.fichier}`} target="_blank" rel="noreferrer" style={styles.link}>
+                    {file.fichier.split("/").pop()}
+                  </a>
+                  <span style={styles.meta}>{new Date(file.dateAjout).toLocaleDateString()}</span>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
-        <textarea
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          rows={3}
-          placeholder="Votre message..."
-          style={styles.textarea}
-        />
-        <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
-      </div>
+        <div style={{ marginTop: "2rem" }}>
+          <h3>Ajouter des fichiers :</h3>
+          <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
+          {newFiles.length > 0 && (
+            <ul style={styles.fileList}>
+              {newFiles.map((file, i) => <li key={i} style={styles.fileItem}>{file.name}</li>)}
+            </ul>
+          )}
+          <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
+            {uploading ? "Envoi..." : "Ajouter"}
+          </button>
+        </div>
 
-      <button onClick={() => navigate("/mes-avis")} style={styles.back}>
-        ⬅ Retour à mes avis
-      </button>
-    </div>
+        <div style={{ marginTop: "3rem" }}>
+          <h3>Chat :</h3>
+          <div style={styles.chatBox}>
+            {avis.chat.length === 0 ? (
+              <p style={styles.info}>Aucun message.</p>
+            ) : (
+              avis.chat.map((msg, i) => (
+                <div key={i} style={styles.message}>
+                  <strong>{msg.auteurId?.email || "Utilisateur"}</strong>
+                  <p>{msg.texte}</p>
+                  <small>{new Date(msg.date).toLocaleString()}</small>
+                </div>
+              ))
+            )}
+          </div>
+
+          <textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            rows={3}
+            placeholder="Votre message..."
+            style={styles.textarea}
+          />
+          <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
+        </div>
+
+        <button onClick={() => navigate("/mes-avis")} style={styles.back}>
+          ⬅ Retour à mes avis
+        </button>
+      </div>
+    </>
   );
 };
 

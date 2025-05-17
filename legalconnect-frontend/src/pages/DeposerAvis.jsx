@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import Header from "../components/Layout/Header"; // 👈 ajout du header
 
 const DeposerAvis = () => {
   const { user } = useContext(AuthContext);
@@ -57,45 +58,48 @@ const DeposerAvis = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Déposer un dossier pour avis</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Titre de l'avis"
-          value={titre}
-          onChange={(e) => setTitre(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <textarea
-          placeholder="Description détaillée"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={6}
-          style={styles.textarea}
-        />
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files))}
-          style={styles.input}
-        />
-        {files.length > 0 && (
-          <ul>
-            {files.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
-        )}
-        {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
-        <button type="submit" style={styles.button}>
-          Envoyer
-        </button>
-      </form>
-    </div>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Déposer un dossier pour avis</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="text"
+            placeholder="Titre de l'avis"
+            value={titre}
+            onChange={(e) => setTitre(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <textarea
+            placeholder="Description détaillée"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            rows={6}
+            style={styles.textarea}
+          />
+          <input
+            type="file"
+            multiple
+            onChange={(e) => setFiles(Array.from(e.target.files))}
+            style={styles.input}
+          />
+          {files.length > 0 && (
+            <ul>
+              {files.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+          )}
+          {error && <p style={styles.error}>{error}</p>}
+          {success && <p style={styles.success}>{success}</p>}
+          <button type="submit" style={styles.button}>
+            Envoyer
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 
