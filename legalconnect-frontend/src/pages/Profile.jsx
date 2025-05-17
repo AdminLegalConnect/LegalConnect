@@ -1,11 +1,13 @@
 // pages/Profile.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../services/AuthContext";
 import Header from "../components/Layout/Header";
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", ville: "", specialite: "", siteInternet: "" });
   const [success, setSuccess] = useState("");
@@ -24,7 +26,6 @@ const Profile = () => {
         setError("Erreur lors de la récupération du profil");
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -33,18 +34,45 @@ const Profile = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+
+    // Exclure les champs interdits (comme le role)
+    const { nom, prenom, email, telephone, ville, specialite, siteInternet } = form;
+
+    const res = await axios.put(
+      "http://localhost:5000/api/profil",
+      { nom, prenom, email, telephone, ville, specialite, siteInternet },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    setSuccess("Profil mis à jour avec succès !");
+    setError("");
+    setProfile(res.data.profil);
+  } catch (err) {
+    setError("Erreur lors de la mise à jour du profil");
+    setSuccess("");
+  }
+};
+
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm("Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.");
+    if (!confirmed) return;
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put("http://localhost:5000/api/profil", form, {
+      await axios.delete("http://localhost:5000/api/profil", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSuccess("Profil mis à jour avec succès !");
-      setError("");
-      setProfile(res.data.profil);
+      localStorage.removeItem("token");
+      setUser(null);
+      navigate("/");
     } catch (err) {
-      setError("Erreur lors de la mise à jour du profil");
-      setSuccess("");
+      setError("Erreur lors de la suppression du compte");
     }
   };
 
@@ -56,29 +84,17 @@ const Profile = () => {
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
-          <label>Nom</label>
-          <input type="text" name="nom" value={form.nom} onChange={handleChange} required />
-
-          <label>Prénom</label>
-          <input type="text" name="prenom" value={form.prenom} onChange={handleChange} required />
-
-          <label>Email</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} required />
-
-          <label>Téléphone</label>
-          <input type="text" name="telephone" value={form.telephone || ""} onChange={handleChange} />
-
-          <label>Ville</label>
-          <input type="text" name="ville" value={form.ville || ""} onChange={handleChange} />
-
-          <label>Spécialité</label>
-          <input type="text" name="specialite" value={form.specialite || ""} onChange={handleChange} />
-
-          <label>Site Internet</label>
-          <input type="url" name="siteInternet" value={form.siteInternet || ""} onChange={handleChange} />
-
+          <input type="text" name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} required style={styles.input} />
+          <input type="text" name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} required style={styles.input} />
+          <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required style={styles.input} />
+          <input type="text" name="telephone" placeholder="Téléphone" value={form.telephone || ""} onChange={handleChange} style={styles.input} />
+          <input type="text" name="ville" placeholder="Ville" value={form.ville || ""} onChange={handleChange} style={styles.input} />
+          <input type="text" name="specialite" placeholder="Spécialité" value={form.specialite || ""} onChange={handleChange} style={styles.input} />
+          <input type="url" name="siteInternet" placeholder="Site Internet" value={form.siteInternet || ""} onChange={handleChange} style={styles.input} />
           <button type="submit" style={styles.button}>Enregistrer</button>
         </form>
+
+        <button onClick={handleDeleteAccount} style={styles.deleteButton}>Supprimer mon compte</button>
       </div>
     </>
   );
@@ -88,27 +104,48 @@ const styles = {
   container: {
     maxWidth: "600px",
     margin: "2rem auto",
-    padding: "1rem",
+    padding: "2rem",
+    background: "#f9fafb",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     fontFamily: "sans-serif",
   },
   heading: {
     fontSize: "1.8rem",
-    marginBottom: "1rem",
+    marginBottom: "1.5rem",
+    color: "#1e3a8a",
   },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.8rem",
+    gap: "1rem",
+  },
+  input: {
+    padding: "0.8rem",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
   },
   button: {
-    marginTop: "1rem",
-    padding: "0.6rem 1rem",
+    padding: "0.8rem",
     backgroundColor: "#2563EB",
     color: "white",
     border: "none",
     borderRadius: "8px",
-    fontWeight: "bold",
     cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "1rem",
+  },
+  deleteButton: {
+    marginTop: "2rem",
+    padding: "0.8rem",
+    backgroundColor: "#dc2626",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "1rem",
   },
   error: {
     color: "red",
