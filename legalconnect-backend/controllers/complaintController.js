@@ -244,7 +244,13 @@ const deleteCoffreFortFile = async (req, res) => {
 const getMyComplaints = async (req, res) => {
   try {
     const userId = req.user.id;
-    const complaints = await Complaint.find({ utilisateur: userId }).sort({ createdAt: -1 });
+    const complaints = await Complaint.find({
+  $or: [
+    { utilisateur: userId },
+    { participants: userId }
+  ]
+}).sort({ createdAt: -1 });
+
 
     res.status(200).json({
       message: "Plaintes de l'utilisateur récupérées avec succès",
