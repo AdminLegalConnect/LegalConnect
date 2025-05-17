@@ -363,6 +363,31 @@ const getPublicComplaintById = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+// ✅ Supprimer un participant d'une plainte
+const retirerParticipant = async (req, res) => {
+  try {
+    const { id, participantId } = req.params;
+    const plainte = await Complaint.findById(id);
+
+    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+
+    // Vérification : seul le créateur peut retirer un participant
+    if (plainte.utilisateur.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Non autorisé" });
+    }
+
+    plainte.participants = plainte.participants.filter(
+      (p) => p.toString() !== participantId
+    );
+
+    await plainte.save();
+
+    res.status(200).json({ message: "Participant retiré avec succès" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
 
 
 
@@ -382,4 +407,5 @@ module.exports = {
   updateVisibilite,
   deleteComplaint,
   getPublicComplaintById,
+  retirerParticipant,
 };

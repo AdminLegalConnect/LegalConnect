@@ -43,6 +43,14 @@ const PlainteDetail = () => {
 
   useEffect(() => { fetchComplaint(); }, [id]);
 
+  useEffect(() => {
+  if (complaint && user) {
+    console.log("User ID :", user._id);
+    console.log("Créateur ID :", complaint.utilisateur?._id);
+  }
+}, [complaint, user]);
+
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -165,6 +173,23 @@ const PlainteDetail = () => {
     }
   };
 
+  const handleRemoveParticipant = async (participantId) => {
+    if (!window.confirm("Retirer ce participant ?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/complaints/${id}/participants/${participantId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess("Participant retiré avec succès");
+      fetchComplaint();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors du retrait du participant");
+    }
+  };
+
+console.log("Contenu de user depuis le context :", user)
+
   if (!complaint) return <p style={{ padding: "2rem" }}>Chargement...</p>;
 
   return (
@@ -269,19 +294,31 @@ const PlainteDetail = () => {
             </div>
 
             {complaint.utilisateur && (
-  <div>
-    <p><strong>Créateur :</strong> {complaint.utilisateur.prenom || complaint.utilisateur.email}</p>
-  </div>
-)}
+              <div>
+                <p><strong>Créateur :</strong> {complaint.utilisateur.prenom || complaint.utilisateur.email}</p>
+              </div>
+            )}
 
             {complaint.participants && complaint.participants.length > 0 && (
               <div>
                 <p><strong>Participants :</strong></p>
                 <ul>
-                  {complaint.participants.map((p, index) => (
-                    <li key={index}>{p.prenom || p.email}</li>
-                  ))}
-                </ul>
+  {complaint.participants.map((p, index) => (
+    <li key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+      <span>{p.prenom || p.email}</span>
+      {user && complaint.utilisateur && (user.id || user._id)?.toString() === complaint.utilisateur._id?.toString()
+ && (
+        <button
+          onClick={() => handleRemoveParticipant(p._id)}
+          style={{ ...styles.deleteButton, padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}
+        >
+          Supprimer
+        </button>
+      )}
+    </li>
+  ))}
+</ul>
+
               </div>
             )}
 
