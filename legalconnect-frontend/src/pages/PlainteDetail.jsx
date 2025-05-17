@@ -191,6 +191,7 @@ const PlainteDetail = () => {
 console.log("Contenu de user depuis le context :", user)
 
   if (!complaint) return <p style={{ padding: "2rem" }}>Chargement...</p>;
+const isCreator = user && complaint.utilisateur && (user._id === complaint.utilisateur._id || user.id === complaint.utilisateur._id);
 
   return (
     <>
@@ -211,23 +212,24 @@ console.log("Contenu de user depuis le context :", user)
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         {activeTab === "details" && (
-          user ? (
-            <form onSubmit={handleUpdate} style={styles.form}>
-              <label>Titre :</label>
-              <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
+  isCreator ? (
+    <form onSubmit={handleUpdate} style={styles.form}>
+      <label>Titre :</label>
+      <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
 
-              <label>Description :</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
+      <label>Description :</label>
+      <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
 
-              <button type="submit" style={styles.button}>Enregistrer</button>
-            </form>
-          ) : (
-            <div>
-              <p><strong>Titre :</strong> {titre}</p>
-              <p><strong>Description :</strong> {description}</p>
-            </div>
-          )
-        )}
+      <button type="submit" style={styles.button}>Enregistrer</button>
+    </form>
+  ) : (
+    <div>
+      <p><strong>Titre :</strong> {titre}</p>
+      <p><strong>Description :</strong> {description}</p>
+    </div>
+  )
+)}
+
 
         {activeTab === "chat" && (
   <div style={styles.chatContainer}>
