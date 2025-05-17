@@ -1,6 +1,7 @@
+// pages/Login.jsx
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
 
 const Login = () => {
@@ -28,30 +29,86 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h2>Connexion</h2>
-      <form onSubmit={handleLogin}>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Connexion</h2>
+      <form onSubmit={handleLogin} style={styles.form}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          style={styles.input}
         />
-        <br />
         <input
           type="password"
           placeholder="Mot de passe"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          style={styles.input}
         />
-        <br />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Se connecter</button>
+        {error && <p style={styles.error}>{error}</p>}
+        <button type="submit" style={styles.button}>Se connecter</button>
       </form>
+      <p style={styles.signupText}>
+        Vous n'avez pas de compte ?
+        <Link to="/signup" style={styles.signupLink}> Créer un compte</Link>
+      </p>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    maxWidth: "400px",
+    margin: "5rem auto",
+    padding: "2rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+    backgroundColor: "#f9fafb",
+    textAlign: "center",
+    fontFamily: "sans-serif",
+  },
+  title: {
+    fontSize: "1.8rem",
+    marginBottom: "1.5rem",
+    color: "#1e3a8a",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  input: {
+    padding: "0.8rem",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+  },
+  button: {
+    padding: "0.8rem",
+    backgroundColor: "#2563EB",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "1rem",
+  },
+  error: {
+    color: "red",
+  },
+  signupText: {
+    marginTop: "1.5rem",
+    fontSize: "0.95rem",
+  },
+  signupLink: {
+    color: "#2563EB",
+    fontWeight: "bold",
+    textDecoration: "none",
+    marginLeft: "0.25rem",
+  },
 };
 
 export default Login;
