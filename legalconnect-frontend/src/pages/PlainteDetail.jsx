@@ -21,26 +21,25 @@ const PlainteDetail = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [emailInvite, setEmailInvite] = useState("");
 
- const fetchComplaint = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const url = token
-      ? `http://localhost:5000/api/complaints/${id}`
-      : `http://localhost:5000/api/public-complaints/${id}`;
+  const fetchComplaint = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = token
+        ? `http://localhost:5000/api/complaints/${id}`
+        : `http://localhost:5000/api/public-complaints/${id}`;
 
-    const res = await axios.get(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+      const res = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
-    setComplaint(res.data.complaint);
-    setTitre(res.data.complaint.titre);
-    setDescription(res.data.complaint.description);
-  } catch (err) {
-    console.error(err);
-    setError("Impossible de charger la plainte");
-  }
-};
-
+      setComplaint(res.data.complaint);
+      setTitre(res.data.complaint.titre);
+      setDescription(res.data.complaint.description);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger la plainte");
+    }
+  };
 
   useEffect(() => { fetchComplaint(); }, [id]);
 
@@ -110,7 +109,7 @@ const PlainteDetail = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !user) return;
     try {
       const token = localStorage.getItem("token");
       await axios.post(`http://localhost:5000/api/complaints/${id}/chat`, {
@@ -127,7 +126,7 @@ const PlainteDetail = () => {
   };
 
   const handleUploadFiles = async () => {
-    if (newFiles.length === 0) return;
+    if (newFiles.length === 0 || !user) return;
     setUploading(true);
     try {
       const token = localStorage.getItem("token");
@@ -153,7 +152,7 @@ const PlainteDetail = () => {
   };
 
   const handleDeleteFile = async (fileId) => {
-    if (!window.confirm("Supprimer ce fichier définitivement ?")) return;
+    if (!window.confirm("Supprimer ce fichier définitivement ?") || !user) return;
     try {
       const token = localStorage.getItem("token");
       await axios.delete(`http://localhost:5000/api/complaints/${id}/coffre-fort/${fileId}`, {
@@ -178,22 +177,31 @@ const PlainteDetail = () => {
           <button onClick={() => setActiveTab("details")} style={activeTab === "details" ? styles.activeTab : styles.tab}>Détails</button>
           <button onClick={() => setActiveTab("chat")} style={activeTab === "chat" ? styles.activeTab : styles.tab}>Chat</button>
           <button onClick={() => setActiveTab("files")} style={activeTab === "files" ? styles.activeTab : styles.tab}>Coffre-fort</button>
-          <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
+          {user && (
+            <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
+          )}
         </div>
 
         {success && <p style={{ color: "green" }}>{success}</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         {activeTab === "details" && (
-          <form onSubmit={handleUpdate} style={styles.form}>
-            <label>Titre :</label>
-            <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
+          user ? (
+            <form onSubmit={handleUpdate} style={styles.form}>
+              <label>Titre :</label>
+              <input type="text" value={titre} onChange={(e) => setTitre(e.target.value)} style={styles.input} />
 
-            <label>Description :</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
+              <label>Description :</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} style={styles.textarea} />
 
-            <button type="submit" style={styles.button}>Enregistrer</button>
-          </form>
+              <button type="submit" style={styles.button}>Enregistrer</button>
+            </form>
+          ) : (
+            <div>
+              <p><strong>Titre :</strong> {titre}</p>
+              <p><strong>Description :</strong> {description}</p>
+            </div>
+          )
         )}
 
         {activeTab === "chat" && (
@@ -201,20 +209,24 @@ const PlainteDetail = () => {
             {complaint.chat.length === 0 ? <p>Aucun message</p> : (
               complaint.chat.map((msg) => (
                 <div key={msg._id} style={styles.message}>
-                  <strong>{msg.expediteur?.prenom || msg.expediteur?.nom || msg.expediteur?.email || "Utilisateur"}</strong>
+                  <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
                   <p>{msg.message}</p>
                   <small>{new Date(msg.date).toLocaleString()}</small>
                 </div>
               ))
             )}
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              rows={3}
-              placeholder="Votre message..."
-              style={styles.textarea}
-            />
-            <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
+            {user && (
+              <>
+                <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  rows={3}
+                  placeholder="Votre message..."
+                  style={styles.textarea}
+                />
+                <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
+              </>
+            )}
           </div>
         )}
 
@@ -230,14 +242,18 @@ const PlainteDetail = () => {
                 ))}
               </ul>
             )}
-            <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
-            <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
-              {uploading ? "Envoi..." : "Ajouter fichier"}
-            </button>
+            {user && (
+              <>
+                <input type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files))} />
+                <button onClick={handleUploadFiles} style={styles.uploadButton} disabled={uploading}>
+                  {uploading ? "Envoi..." : "Ajouter fichier"}
+                </button>
+              </>
+            )}
           </div>
         )}
 
-        {activeTab === "settings" && (
+        {activeTab === "settings" && user && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div>
               <label>Inviter un participant :</label><br />
