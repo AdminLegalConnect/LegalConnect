@@ -10,7 +10,9 @@ const {
   addCoffreFortFile,
   getAvisByUser,
   getAvisById,
-  getAvisForParticulier
+  deleteAvis,
+  getAvisForParticulier,
+  updateAvis
 } = require('../controllers/avisController');
 
 // Route pour déposer un avis
@@ -29,6 +31,11 @@ router.get('/avis/mes', authMiddleware, getAvisByUser);
 router.get('/avis/particuliers', authMiddleware, getAvisForParticulier);
 
 router.get('/avis/:id', authMiddleware, getAvisById);
+
+router.delete('/avis/:id', authMiddleware, deleteAvis);
+
+router.put('/avis/:id', authMiddleware, updateAvis);
+
 
 
 module.exports = router;

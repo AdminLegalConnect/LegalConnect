@@ -113,6 +113,48 @@ const getAvisById = async (req, res) => {
   }
 };
 
+const deleteAvis = async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis non trouvé" });
+
+    if (avis.utilisateurId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Non autorisé à supprimer cet avis" });
+    }
+
+    await Avis.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Avis supprimé avec succès" });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
+
+const updateAvis = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titre, description } = req.body;
+
+    const avis = await Avis.findById(id);
+    if (!avis) return res.status(404).json({ message: "Avis non trouvé" });
+
+    // Vérifie que l'utilisateur est bien le créateur
+    if (avis.utilisateurId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Non autorisé à modifier cet avis" });
+    }
+
+    avis.titre = titre || avis.titre;
+    avis.description = description || avis.description;
+
+    await avis.save();
+
+    res.status(200).json({ message: "Avis mis à jour", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de la mise à jour", error: err.message });
+  }
+};
+
+
+
 
 
 module.exports = {
@@ -120,6 +162,8 @@ module.exports = {
   addChatMessage,
   addCoffreFortFile,
   getAvisByUser,
-  getAvisById,          
+  getAvisById,
+  deleteAvis,
+  updateAvis,          
   getAvisForParticulier
 };

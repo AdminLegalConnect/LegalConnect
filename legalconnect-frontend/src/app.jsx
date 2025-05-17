@@ -29,6 +29,8 @@ function App() {
       <Route path="/mes-avis" element={<MesAvis />} />
       <Route path="/mes-avis/:id" element={<AvisDetail />} />
       <Route path="/deposer-avis" element={<DeposerAvis />} />
+      <Route path="/mes-avis/:id" element={<AvisDetail />} />
+
 
     </Routes>
   );
