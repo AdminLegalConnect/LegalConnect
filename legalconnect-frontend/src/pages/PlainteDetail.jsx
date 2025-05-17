@@ -230,30 +230,60 @@ console.log("Contenu de user depuis le context :", user)
         )}
 
         {activeTab === "chat" && (
-          <div style={styles.chatBox}>
-            {complaint.chat.length === 0 ? <p>Aucun message</p> : (
-              complaint.chat.map((msg) => (
-                <div key={msg._id} style={styles.message}>
-                  <strong>{msg.expediteur?.prenom || msg.expediteur?.email || "Utilisateur"}</strong>
-                  <p>{msg.message}</p>
-                  <small>{new Date(msg.date).toLocaleString()}</small>
-                </div>
-              ))
-            )}
-            {user && (
-              <>
-                <textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  rows={3}
-                  placeholder="Votre message..."
-                  style={styles.textarea}
-                />
-                <button onClick={handleSendMessage} style={styles.button}>Envoyer</button>
-              </>
-            )}
+  <div style={styles.chatContainer}>
+    <div style={styles.chatMessages}>
+      {complaint.chat.map((msg) => {
+        const expediteur = msg.expediteur;
+        const isCurrentUser = (user?.id || user?._id) === expediteur?._id;
+        const isJuridique = expediteur?.role === "juridique";
+
+        return (
+          <div
+            key={msg._id}
+            style={{
+              alignSelf: isCurrentUser ? "flex-end" : "flex-start",
+              backgroundColor: isCurrentUser ? "#dbeafe" : isJuridique ? "#fef9c3" : "#e5e7eb",
+              color: "#111827",
+              borderRadius: "12px",
+              padding: "0.8rem",
+              maxWidth: "75%",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              marginBottom: "1rem",
+            }}
+          >
+            <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
+              {expediteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
+              {expediteur?.prenom || expediteur?.email} 
+              {expediteur?.role ? ` - ${expediteur.role}` : ""}
+            </div>
+            <div>{msg.message}</div>
+            <div style={{ fontSize: "0.75rem", marginTop: "0.5rem", color: "#6b7280" }}>
+              {new Date(msg.date).toLocaleString("fr-FR")}
+            </div>
           </div>
-        )}
+        );
+      })}
+    </div>
+
+    {user && (
+      <div style={styles.chatInputBox}>
+        <textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          rows={2}
+          placeholder="Votre message..."
+          style={styles.chatTextarea}
+        />
+        <button onClick={handleSendMessage} style={styles.chatSendButton}>
+          Envoyer
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
+
+        
 
         {activeTab === "files" && (
           <div>
@@ -348,6 +378,7 @@ const styles = {
   chatBox: { display: "flex", flexDirection: "column", gap: "1rem" },
   message: { backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "8px" },
   uploadButton: { marginTop: "1rem", backgroundColor: "#16a34a", color: "white", border: "none", padding: "0.6rem 1rem", borderRadius: "8px" }
+  
 };
 
 export default PlainteDetail;
