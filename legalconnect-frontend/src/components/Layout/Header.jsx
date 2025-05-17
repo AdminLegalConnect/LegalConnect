@@ -1,4 +1,4 @@
-// Header.jsx
+// components/Layout/Header.jsx
 import React, { useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
@@ -21,17 +21,17 @@ const Header = () => {
         <span style={styles.logoText}>LegalConnect</span>
       </div>
 
-      <div style={styles.navLinks}>
+      <nav style={styles.navLinks}>
         {user && (
           <>
             <Link to="/dashboard" style={styles.link}>Dashboard</Link>
             <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
             <Link to="/mes-avis" style={styles.link}>Mes avis</Link>
-            <Link to="/profil" style={styles.link}>Mon profil</Link> {/* 🔥 Lien ajouté ici */}
+            <Link to="/profil" style={styles.link}>Mon profil</Link>
           </>
         )}
         <button onClick={handleLogout} style={styles.logoutButton}>Déconnexion</button>
-      </div>
+      </nav>
     </header>
   );
 };
@@ -44,7 +44,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottom: "2px solid #3b82f6",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
     position: "sticky",
     top: 0,
     zIndex: 1000,
@@ -52,27 +52,30 @@ const styles = {
   logoContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: "0.75rem",
     cursor: "pointer",
   },
   logo: {
-    width: "32px",
-    height: "32px",
+    width: "36px",
+    height: "36px",
   },
   logoText: {
-    fontSize: "1.2rem",
+    fontSize: "1.4rem",
     fontWeight: "bold",
+    color: "white",
   },
   navLinks: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem",
+    gap: "1.5rem",
     flexWrap: "wrap",
   },
   link: {
     color: "white",
     textDecoration: "none",
-    fontWeight: "bold",
+    fontWeight: "500",
+    fontSize: "1rem",
+    transition: "opacity 0.2s",
   },
   logoutButton: {
     backgroundColor: "#ef4444",
@@ -82,6 +85,7 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold",
+    transition: "background-color 0.2s",
   },
 };
 
