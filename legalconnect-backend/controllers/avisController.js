@@ -100,10 +100,26 @@ const getAvisForParticulier = async (req, res) => {
   }
 };
 
+// Récupérer un avis par ID
+const getAvisById = async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id).populate('chat.auteurId', 'email');
+    if (!avis) {
+      return res.status(404).json({ message: "Avis non trouvé" });
+    }
+    res.status(200).json({ avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de la récupération de l'avis", error: err.message });
+  }
+};
+
+
+
 module.exports = {
   createAvis,
   addChatMessage,
   addCoffreFortFile,
-  getAvisByUser,             // ✅ bien exportée
+  getAvisByUser,
+  getAvisById,          
   getAvisForParticulier
 };

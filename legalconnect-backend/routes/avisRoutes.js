@@ -9,6 +9,7 @@ const {
   addChatMessage,
   addCoffreFortFile,
   getAvisByUser,
+  getAvisById,
   getAvisForParticulier
 } = require('../controllers/avisController');
 
@@ -26,5 +27,8 @@ router.get('/avis/mes', authMiddleware, getAvisByUser);
 
 // Route pour l'avocat : voir les avis déposés par d'autres
 router.get('/avis/particuliers', authMiddleware, getAvisForParticulier);
+
+router.get('/avis/:id', authMiddleware, getAvisById);
+
 
 module.exports = router;
