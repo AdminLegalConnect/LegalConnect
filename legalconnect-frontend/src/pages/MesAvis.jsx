@@ -43,10 +43,18 @@ const MesAvis = () => {
           </button>
         </div>
 
-        <h2 style={styles.heading}>Mes avis</h2>
+        <h2 style={styles.heading}>
+  {user.role === "juridique" ? "Avis suivis" : "Mes avis"}
+</h2>
+
         {error && <p style={styles.error}>{error}</p>}
         {avisList.length === 0 ? (
-          <p style={styles.info}>Vous n’avez encore déposé aucun avis.</p>
+          <p style={styles.info}>
+  {user.role === "juridique"
+    ? "Vous ne suivez encore aucun avis."
+    : "Vous n’avez encore déposé aucun avis."}
+</p>
+
         ) : (
           <ul style={styles.list}>
             {avisList.map((avis) => (
@@ -82,7 +90,10 @@ const MesAvis = () => {
                   })}</span>
                 </p>
                 <button
-                  onClick={() => navigate(`/mes-avis/${avis._id}`)}
+                  onClick={() =>
+  navigate(user.role === "juridique" ? `/juridique/avis/${avis._id}` : `/mes-avis/${avis._id}`)
+}
+
                   style={styles.button}
                 >
                   Voir

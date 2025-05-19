@@ -145,7 +145,11 @@ const AvisDetailJuridique = () => {
         </div>
       )}
 
-{!avis.participants?.includes(user._id) && (
+{avis.participants?.includes(user._id) ? (
+  <p style={{ marginTop: "1rem", color: "green", fontWeight: "bold" }}>
+    ✅ Vous suivez déjà cet avis.
+  </p>
+) : (
   <button
     onClick={async () => {
       try {
@@ -153,18 +157,33 @@ const AvisDetailJuridique = () => {
         await axios.post(`http://localhost:5000/api/avis/${avis._id}/suivre`, {}, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSuccess("Vous suivez maintenant cet avis !");
-        fetchAvis();
+
+        setAvis(prev => ({
+          ...prev,
+          participants: [...(prev.participants || []), user._id]
+        }));
+
+        setSuccess("✅ Vous suivez maintenant cet avis !");
       } catch (err) {
         console.error(err);
         setError("Erreur lors du suivi de l'avis.");
       }
     }}
-    style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1e40af", color: "white", border: "none", borderRadius: "6px" }}
+    style={{
+      marginTop: "1rem",
+      padding: "0.5rem 1rem",
+      backgroundColor: "#1e40af",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }}
   >
-    Suivre cet avis
+    🔔 Suivre cet avis
   </button>
 )}
+
+
 
 
       {/* Coffre-fort : pièces jointes */}
