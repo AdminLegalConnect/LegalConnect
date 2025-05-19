@@ -11,29 +11,40 @@ const { user } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!user || !user.token) {
+      alert("Vous devez être connecté pour créer un sujet.");
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:5000/api/forum/posts", {
-        titre,
-        contenu,
-        thematique,
-      }, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
+      const res = await axios.post(
+        "http://localhost:5000/api/forum/posts",
+        {
+          titre,
+          contenu,
+          thematique,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
 
       setMessage("Sujet créé avec succès !");
       setTimeout(() => navigate("/forum"), 1500);
     } catch (error) {
-      console.error(error);
+      console.error("Erreur lors de la création du sujet :", error);
       setMessage("Erreur lors de la création du sujet.");
     }
   };
 
-  return (
+
+
+   return (
     <div className="container mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">Créer un nouveau sujet</h2>
       {message && <p className="mb-4 text-red-600">{message}</p>}

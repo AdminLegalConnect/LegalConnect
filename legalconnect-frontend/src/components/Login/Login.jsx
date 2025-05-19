@@ -1,15 +1,18 @@
-// pages/Login.jsx
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
 
 const Login = () => {
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  if (user && user.token) {
+    return <Navigate to="/dashboard" />;
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,10 +22,13 @@ const Login = () => {
         password,
       });
 
-      const { token, utilisateur } = res.data;
+      const { token } = res.data;
       localStorage.setItem("token", token);
-      setUser(utilisateur);
-      navigate("/dashboard");
+
+      const userData = JSON.parse(atob(token.split(".")[1]));
+      setUser({ ...userData, token });
+
+      window.location.reload(); // recharge l’app avec AuthContext
     } catch (err) {
       setError("Email ou mot de passe incorrect");
     }
