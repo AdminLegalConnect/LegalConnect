@@ -3,6 +3,20 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// Ajoute cette fonction en haut du fichier Forum.jsx
+const getThemeColor = (thematique) => {
+  const colors = {
+    travail: "#3B82F6",        // bleu
+    voisinage: "#10B981",      // vert
+    famille: "#F59E0B",        // orange
+    logement: "#EF4444",       // rouge
+    consommation: "#8B5CF6",   // violet
+    autre: "#6B7280",          // gris
+  };
+  return colors[thematique?.toLowerCase()] || "#6B7280";
+};
+
+
 const Forum = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
@@ -39,8 +53,21 @@ const Forum = () => {
             <li key={post._id} style={styles.item}>
               <strong style={styles.title}>{post.titre}</strong>
               <p style={styles.meta}>
-                <span>{post.thematique}</span> • <span>{new Date(post.dateCreation).toLocaleDateString("fr-FR")}</span>
-              </p>
+  <span
+    style={{
+      backgroundColor: getThemeColor(post.thematique),
+      color: "white",
+      padding: "2px 8px",
+      borderRadius: "12px",
+      fontSize: "0.8rem",
+      marginRight: "0.5rem",
+    }}
+  >
+    {post.thematique}
+  </span>
+  <span>{new Date(post.dateCreation).toLocaleDateString("fr-FR")}</span>
+</p>
+
               <p style={styles.desc}>{post.contenu.slice(0, 100)}...</p>
               <p style={styles.auteur}>Par {post.auteur?.prenom || post.auteur?.email}</p>
               <button onClick={() => navigate(`/forum/${post._id}`)} style={styles.button}>
