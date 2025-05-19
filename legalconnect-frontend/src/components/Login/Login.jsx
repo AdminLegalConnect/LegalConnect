@@ -4,12 +4,18 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
 
 const Login = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // 1. Attendre que le AuthContext charge l'utilisateur
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
+  // 2. Si déjà connecté, rediriger
   if (user && user.token) {
     return <Navigate to="/dashboard" />;
   }
@@ -28,7 +34,6 @@ const Login = () => {
       const userData = JSON.parse(atob(token.split(".")[1]));
       setUser({ ...userData, token });
 
-      window.location.reload(); // recharge l’app avec AuthContext
     } catch (err) {
       setError("Email ou mot de passe incorrect");
     }
@@ -55,11 +60,16 @@ const Login = () => {
           style={styles.input}
         />
         {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" style={styles.button}>Se connecter</button>
+        <button type="submit" style={styles.button}>
+          Se connecter
+        </button>
       </form>
       <p style={styles.signupText}>
         Vous n'avez pas de compte ?
-        <Link to="/signup" style={styles.signupLink}> Créer un compte</Link>
+        <Link to="/signup" style={styles.signupLink}>
+          {" "}
+          Créer un compte
+        </Link>
       </p>
     </div>
   );
