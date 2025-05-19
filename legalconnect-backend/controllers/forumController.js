@@ -122,6 +122,36 @@ const createComment = async (req, res) => {
   }
 };
 
+// POST /posts/:id/commentaires
+const ajouterCommentaire = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post non trouvé" });
+
+    const commentaire = new Commentaire({
+      contenu: req.body.contenu,
+      auteur: req.user.id,
+      post: post._id,
+    });
+
+    await commentaire.save();
+
+    // ✅ Ajoute l'ID du commentaire au post
+    post.commentaires = post.commentaires || []; // protection au cas où
+    post.commentaires.push(commentaire._id);
+    await post.save();
+
+    res.status(201).json({ message: "Commentaire ajouté", comment: commentaire });
+  } catch (err) {
+    console.error("Erreur lors de l'ajout du commentaire :", err);
+    res.status(500).json({ message: "Erreur serveur lors de l'ajout du commentaire", error: err.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   uploadPostFile,
   uploadCommentFile,
@@ -129,4 +159,5 @@ module.exports = {
   createPost,
   getPostById,
   createComment,
+  ajouterCommentaire,
 };

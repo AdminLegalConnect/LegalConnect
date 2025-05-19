@@ -20,6 +20,7 @@ function ForumDetail() {
     try {
       const res = await axios.get(`http://localhost:5000/api/forum/posts/${id}`);
       setPost(res.data.post);
+      console.log("Commentaires chargés :", res.data.post.commentaires);
     } catch (err) {
       console.error(err);
       setError("Erreur lors du chargement du post.");
@@ -29,15 +30,21 @@ function ForumDetail() {
   };
 
   const handleCommentSubmit = async (e) => {
-  e.preventDefault();
-  console.log("💬 Soumission du commentaire déclenchée");
+    e.preventDefault();
+    console.log("💬 Soumission du commentaire déclenchée");
 
     if (!user || !user.token) {
       return alert("Vous devez être connecté pour commenter.");
     }
 
+    if (!commentContent.trim()) {
+      console.warn("❌ Commentaire vide");
+      alert("Veuillez écrire un commentaire avant d'envoyer.");
+      return;
+    }
+
     try {
-      // 1. Créer le commentaire texte
+      // 1. Création du commentaire
       const res = await axios.post(
         `http://localhost:5000/api/forum/posts/${id}/commentaires`,
         { contenu: commentContent },
@@ -48,9 +55,11 @@ function ForumDetail() {
         }
       );
 
-      const commentaireId = res.data.comment._id;
+      const commentaireId = res.data.comment?._id;
 
-      // 2. Ajouter un fichier si présent
+      console.log("✅ Commentaire posté :", res.data.comment);
+
+      // 2. Upload fichier si présent
       if (commentFile) {
         const formData = new FormData();
         formData.append("fichier", commentFile);
@@ -65,13 +74,17 @@ function ForumDetail() {
             },
           }
         );
+
+        console.log("📎 Fichier uploadé pour le commentaire.");
       }
 
+      // 3. Réinitialiser
       setCommentContent("");
       setCommentFile(null);
-      fetchPost();
+      fetchPost(); // recharge les commentaires
+
     } catch (err) {
-      console.error("Erreur lors de l'ajout du commentaire :", err);
+      console.error("❌ Erreur lors de l'ajout du commentaire :", err.response?.data || err.message);
       alert("Impossible d'ajouter le commentaire.");
     }
   };
@@ -111,7 +124,7 @@ function ForumDetail() {
 
       <div className="mt-10">
         <h3 className="text-lg font-semibold mb-4">Commentaires :</h3>
-        {post.commentaires.length > 0 ? (
+        {Array.isArray(post.commentaires) && post.commentaires.length > 0 ? (
           post.commentaires.map((comment) => (
             <div key={comment._id} className="border p-3 rounded mb-3">
               <p className="text-sm font-semibold mb-1">
