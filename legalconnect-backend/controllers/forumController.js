@@ -14,7 +14,8 @@ const uploadPostFile = async (req, res) => {
 
     post.piecesJointes.push({
       nomFichier: req.file.originalname,
-      url: `/uploads/forum/${req.file.filename}`,
+      url: `/uploads/${req.file.filename}`,
+
     });
     await post.save();
 
@@ -36,7 +37,8 @@ const uploadCommentFile = async (req, res) => {
 
     commentaire.piecesJointes.push({
       nomFichier: req.file.originalname,
-      url: `/uploads/forum/${req.file.filename}`,
+      url: `/uploads/${req.file.filename}`,
+
     });
     await commentaire.save();
 
