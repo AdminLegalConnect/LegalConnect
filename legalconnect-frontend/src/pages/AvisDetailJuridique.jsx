@@ -1,18 +1,20 @@
 // pages/AvisDetailJuridique.jsx
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AuthContext } from "../services/AuthContext";
 
 const AvisDetailJuridique = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [avis, setAvis] = useState(null);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [newFile, setNewFile] = useState(null);
+  const [fileDescription, setFileDescription] = useState("");
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const fetchAvis = async () => {
@@ -66,6 +68,35 @@ const AvisDetailJuridique = () => {
     }
   };
 
+  const handleUploadFile = async () => {
+    if (!newFile) return;
+    setUploading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("fichier", newFile);
+      formData.append("avisId", id);
+      formData.append("description", fileDescription);
+
+      await axios.post(`http://localhost:5000/api/avis/coffre-fort`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      });
+
+      setSuccess("Fichier ajouté avec succès !");
+      setNewFile(null);
+      setFileDescription("");
+      fetchAvis();
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'ajout du fichier");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!avis) return <p style={{ padding: "2rem" }}>Chargement...</p>;
 
   return (
@@ -93,7 +124,6 @@ const AvisDetailJuridique = () => {
           Mettre à jour
         </button>
       </div>
-
       {/* Historique des statuts */}
       {avis.historiqueStatut && avis.historiqueStatut.length > 0 && (
         <div style={{ marginTop: "2rem" }}>
@@ -114,6 +144,47 @@ const AvisDetailJuridique = () => {
           </div>
         </div>
       )}
+
+      {/* Coffre-fort : pièces jointes */}
+      {avis.coffreFort && avis.coffreFort.length > 0 && (
+        <div style={{ marginTop: "2rem" }}>
+          <h3>Pièces jointes du coffre-fort</h3>
+          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+            {avis.coffreFort.map((file, index) => (
+              <li key={index} style={{ marginBottom: "0.5rem" }}>
+                <a
+                  href={`http://localhost:5000/${file.fichier}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#1d4ed8", textDecoration: "underline" }}
+                >
+                  {file.description || `Fichier ${index + 1}`}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Formulaire d'ajout */}
+      <div style={{ marginTop: "1.5rem" }}>
+        <h4>Ajouter un fichier</h4>
+        <input type="file" onChange={(e) => setNewFile(e.target.files[0])} />
+        <input
+          type="text"
+          placeholder="Description"
+          value={fileDescription}
+          onChange={(e) => setFileDescription(e.target.value)}
+          style={{ marginLeft: "0.5rem" }}
+        />
+        <button
+          onClick={handleUploadFile}
+          disabled={uploading}
+          style={{ marginLeft: "0.5rem", padding: "0.4rem 1rem", backgroundColor: "#10b981", color: "white", border: "none", borderRadius: "6px" }}
+        >
+          {uploading ? "Envoi..." : "Ajouter"}
+        </button>
+      </div>
 
       <hr style={{ margin: "2rem 0" }} />
 
