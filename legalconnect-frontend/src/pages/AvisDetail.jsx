@@ -3,11 +3,16 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import AvisDetailJuridique from "./AvisDetailJuridique"; // ajout
 
 const avisDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+
+  if (user?.role === "juridique") {
+    return <AvisDetailJuridique />;
+  }
   const messagesEndRef = useRef(null);
   const scrollToBottom = () => {
   if (messagesEndRef.current) {

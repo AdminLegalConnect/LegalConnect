@@ -124,7 +124,8 @@ const getAvisById = async (req, res) => {
     const avis = await Avis.findById(req.params.id)
       .populate('chat.auteurId', 'prenom email role')
       .populate('participants', 'prenom email') // 👈 ajoute cette ligne
-      .populate('utilisateurId', 'prenom email'); // 👈 pour avoir le créateur aussi
+      .populate('utilisateurId', 'prenom nom email')
+
 
     if (!avis) {
       return res.status(404).json({ message: "Avis non trouvé" });

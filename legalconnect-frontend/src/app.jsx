@@ -39,6 +39,7 @@ function App() {
         <Route path="/forum/nouveau" element={<CreatePost />} />
         <Route path="/forum/:id" element={<ForumDetail />} />
         <Route path="/recherche-avis" element={<ChercherAvis />} />
+        <Route path="/avis/:id" element={<AvisDetail />} />
       </Route>
     </Routes>
   );
