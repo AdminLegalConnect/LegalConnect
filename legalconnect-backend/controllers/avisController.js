@@ -100,15 +100,23 @@ const getAvisForParticulier = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (user.role !== "juridique") {
-      return res.status(403).json({ message: "Accès interdit : vous devez être un avocat pour consulter les avis." });
+      return res.status(403).json({ message: "Accès interdit : vous devez être un avocat." });
     }
 
-    const avis = await Avis.find({ utilisateurId: { $ne: req.user.id } });
-    res.status(200).json({ message: "Avis des particuliers récupérés avec succès.", avis });
+    // On récupère tous les avis non résolus avec leur auteur
+    const allAvis = await Avis.find({ statut: { $ne: "résolu" } })
+      .populate("utilisateurId", "prenom email role");
+
+    // On filtre les avis dont l’auteur est bien un particulier
+    const avisFiltrés = allAvis.filter(a => a.utilisateurId && a.utilisateurId.role === "particulier");
+
+    res.status(200).json({ message: "Avis récupérés", avis: avisFiltrés });
   } catch (err) {
-    res.status(500).json({ message: "Erreur lors de la récupération des avis.", error: err.message });
+    console.error("Erreur dans getAvisForParticulier:", err.message);
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
+
 
 // Récupérer un avis par ID
 const getAvisById = async (req, res) => {

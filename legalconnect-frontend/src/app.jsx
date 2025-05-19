@@ -13,7 +13,8 @@ import ForumDetail from "./pages/ForumDetail";
 import DeposerAvis from "./pages/DeposerAvis";
 import MesAvis from "./pages/MesAvis";
 import AvisDetail from "./pages/AvisDetail";
-import MainLayout from "./components/Layout/MainLayout"; // 💡 à ajouter
+import MainLayout from "./components/Layout/MainLayout"; 
+import ChercherAvis from "./pages/ChercherAvis";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/forum" element={<Forum />} />
         <Route path="/forum/nouveau" element={<CreatePost />} />
         <Route path="/forum/:id" element={<ForumDetail />} />
+        <Route path="/recherche-avis" element={<ChercherAvis />} />
       </Route>
     </Routes>
   );
