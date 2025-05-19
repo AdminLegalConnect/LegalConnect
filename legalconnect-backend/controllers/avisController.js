@@ -125,6 +125,7 @@ const getAvisById = async (req, res) => {
       .populate('chat.auteurId', 'prenom email role')
       .populate('participants', 'prenom email') // 👈 ajoute cette ligne
       .populate('utilisateurId', 'prenom nom email')
+      .populate("historiqueStatut.modifiéPar", "prenom nom email")
 
 
     if (!avis) {
@@ -157,26 +158,37 @@ const deleteAvis = async (req, res) => {
 const updateAvis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titre, description } = req.body;
+    const { titre, description, statut } = req.body;
 
     const avis = await Avis.findById(id);
     if (!avis) return res.status(404).json({ message: "Avis non trouvé" });
 
-    // Vérifie que l'utilisateur est bien le créateur
-    if (avis.utilisateurId.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Non autorisé à modifier cet avis" });
+    // Si l'utilisateur est le créateur (particulier)
+    if (avis.utilisateurId.toString() === req.user.id) {
+      if (titre) avis.titre = titre;
+      if (description) avis.description = description;
     }
 
-    avis.titre = titre || avis.titre;
-    avis.description = description || avis.description;
+    // Si l'utilisateur est un juridique : autoriser la modification du statut
+    if (req.user.role === "juridique") {
+      if (statut && statut !== avis.statut) {
+        avis.historiqueStatut = avis.historiqueStatut || [];
+        avis.historiqueStatut.push({
+          statut: statut,
+          modifiéPar: req.user.id,
+        });
+        avis.statut = statut;
+      }
+    }
 
     await avis.save();
-
     res.status(200).json({ message: "Avis mis à jour", avis });
+
   } catch (err) {
     res.status(500).json({ message: "Erreur lors de la mise à jour", error: err.message });
   }
 };
+
 
 const inviterParticipant = async (req, res) => {
   try {

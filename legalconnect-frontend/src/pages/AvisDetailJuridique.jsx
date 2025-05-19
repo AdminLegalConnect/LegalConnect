@@ -76,9 +76,8 @@ const AvisDetailJuridique = () => {
 
       <p><strong>Description :</strong> {avis.description}</p>
       <p>
-   <strong>Déposé par :</strong> {avis.utilisateurId?.prenom} {avis.utilisateurId?.nom} ({avis.utilisateurId?.email})
-</p>
-
+        <strong>Déposé par :</strong> {avis.utilisateurId?.prenom} {avis.utilisateurId?.nom} ({avis.utilisateurId?.email})
+      </p>
       <p><strong>Date :</strong> {new Date(avis.dateDepot).toLocaleDateString()}</p>
 
       <hr style={{ margin: "1.5rem 0" }} />
@@ -94,6 +93,27 @@ const AvisDetailJuridique = () => {
           Mettre à jour
         </button>
       </div>
+
+      {/* Historique des statuts */}
+      {avis.historiqueStatut && avis.historiqueStatut.length > 0 && (
+        <div style={{ marginTop: "2rem" }}>
+          <h3>Historique des statuts</h3>
+          <div style={{
+            border: "1px solid #e5e7eb",
+            borderRadius: "8px",
+            padding: "1rem",
+            backgroundColor: "#f9fafb",
+          }}>
+            <ul style={{ listStyle: "disc", paddingLeft: "1.5rem" }}>
+              {avis.historiqueStatut.map((entry, index) => (
+                <li key={index} style={{ marginBottom: "0.5rem" }}>
+                  {new Date(entry.date).toLocaleString("fr-FR")} – <strong>{entry.statut}</strong> par {entry.modifiéPar?.prenom} {entry.modifiéPar?.nom} ({entry.modifiéPar?.email})
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <hr style={{ margin: "2rem 0" }} />
 

@@ -7,6 +7,14 @@ const avisSchema = new mongoose.Schema({
   description: { type: String, required: true },
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   statut: { type: String, enum: ["en attente", "en cours", "résolu"], default: "en attente" },  // Statut de l'avis
+  historiqueStatut: [
+  {
+    statut: String,
+    date: { type: Date, default: Date.now },
+    modifiéPar: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  }
+],
+
   chat: [
     {
       auteurId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -23,5 +31,6 @@ const avisSchema = new mongoose.Schema({
   ], // Coffre-fort pour ajouter des documents
   dateDepot: { type: Date, default: Date.now },
 }, { timestamps: true });
+
 
 module.exports = mongoose.model("Avis", avisSchema);
