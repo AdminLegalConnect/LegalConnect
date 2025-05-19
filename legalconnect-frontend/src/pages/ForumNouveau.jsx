@@ -3,7 +3,6 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header";
 
 const ForumNouveau = () => {
   const { user } = useContext(AuthContext);
@@ -31,7 +30,6 @@ const ForumNouveau = () => {
 
   return (
     <>
-      <Header />
       <div style={{ maxWidth: "700px", margin: "2rem auto", padding: "1rem" }}>
         <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Nouveau sujet</h2>
         {error && <p style={{ color: "red" }}>{error}</p>}

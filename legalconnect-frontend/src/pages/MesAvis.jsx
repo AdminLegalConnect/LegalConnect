@@ -3,7 +3,6 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Layout/Header";
 
 const MesAvis = () => {
   const { user } = useContext(AuthContext);
@@ -37,7 +36,6 @@ const MesAvis = () => {
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <div style={styles.newButtonBox}>
           <button onClick={() => navigate("/deposer-avis")} style={styles.newButton}>

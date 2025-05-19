@@ -3,7 +3,6 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header";
 
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -112,7 +111,6 @@ const Profile = () => {
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <h2 style={styles.heading}>Mon profil</h2>
         {profile?.photo && (

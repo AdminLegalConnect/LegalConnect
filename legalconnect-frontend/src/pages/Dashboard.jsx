@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header";
 import { FiEdit, FiSearch, FiFolder, FiLayers } from "react-icons/fi";
 
 const iconMap = {
@@ -56,7 +55,6 @@ const Dashboard = () => {
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <div style={styles.welcomeBox}>
           <h1 style={styles.heading}>Bienvenue, {user?.prenom || user?.email}</h1>

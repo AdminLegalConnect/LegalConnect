@@ -2,7 +2,6 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header"; // 👈 ajout du header
 
 const DeposerAvis = () => {
   const { user } = useContext(AuthContext);
@@ -59,7 +58,6 @@ const DeposerAvis = () => {
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <h2 style={styles.heading}>Déposer un dossier pour avis</h2>
         <form onSubmit={handleSubmit} style={styles.form}>

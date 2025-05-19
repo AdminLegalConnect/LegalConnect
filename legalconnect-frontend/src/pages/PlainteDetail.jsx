@@ -3,7 +3,6 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
-import Header from "../components/Layout/Header";
 
 const PlainteDetail = () => {
   const { id } = useParams();
@@ -208,7 +207,6 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <h2 style={styles.heading}>Plainte : {complaint.titre}</h2>
 

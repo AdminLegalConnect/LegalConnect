@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Layout/Header";
 
 const Forum = () => {
   const [posts, setPosts] = useState([]);
@@ -27,7 +26,6 @@ const Forum = () => {
 
   return (
     <>
-      <Header />
       <div style={styles.container}>
         <div style={styles.headerBox}>
           <h2 style={styles.heading}>Forum - Explorer les thématiques</h2>
