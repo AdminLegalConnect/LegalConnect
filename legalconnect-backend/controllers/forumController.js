@@ -102,30 +102,11 @@ const getPostById = async (req, res) => {
   }
 };
 
-// Créer un commentaire
-const createComment = async (req, res) => {
-  try {
-    const { contenu } = req.body;
-    const { postId } = req.params;
-
-    const comment = new Commentaire({
-      post: postId,
-      auteur: req.user.id,
-      contenu,
-    });
-
-    await comment.save();
-
-    res.status(201).json({ message: "Commentaire ajouté avec succès", comment });
-  } catch (err) {
-    res.status(500).json({ message: "Erreur lors de l'ajout du commentaire", error: err.message });
-  }
-};
 
 // POST /posts/:id/commentaires
 const ajouterCommentaire = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: "Post non trouvé" });
 
     const commentaire = new Commentaire({
@@ -158,6 +139,5 @@ module.exports = {
   getAllPosts,
   createPost,
   getPostById,
-  createComment,
   ajouterCommentaire,
 };

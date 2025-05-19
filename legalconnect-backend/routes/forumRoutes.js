@@ -11,7 +11,6 @@ const {
   getAllPosts,
   createPost,
   getPostById,
-  createComment,
   ajouterCommentaire
 } = require("../controllers/forumController");
 
@@ -32,10 +31,9 @@ router.post("/forum/posts", authMiddleware, createPost);
 router.get("/forum/posts/:id", getPostById);
 
 // POST ajouter un commentaire à un post
-router.post("/forum/posts/:postId/commentaires", authMiddleware, createComment);
-
-// POST ajouter un commentaire à un post
 router.post("/forum/posts/:postId/commentaires", authMiddleware, ajouterCommentaire);
+
+
 
 
 
