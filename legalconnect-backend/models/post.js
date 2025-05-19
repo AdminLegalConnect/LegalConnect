@@ -7,6 +7,7 @@ const postSchema = new mongoose.Schema({
   auteur: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   dateCreation: { type: Date, default: Date.now },
   thematique: { type: String, required: true }, // ex : "Voisinage", "Travail", etc.
+  commentaires: [{ type: mongoose.Schema.Types.ObjectId, ref: "Commentaire" }],
     piecesJointes: [
   {
     nomFichier: String,

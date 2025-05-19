@@ -1,6 +1,7 @@
 // controllers/forumController.js
 const Post = require("../models/post");
 const Commentaire = require("../models/commentaire");
+const mongoose = require("mongoose"); // <-- tu dois l’ajouter en haut du fichier
 
 // Ajouter une pièce jointe à un post
 const uploadPostFile = async (req, res) => {
@@ -77,6 +78,13 @@ const createPost = async (req, res) => {
 
 // Récupérer un post avec ses commentaires
 const getPostById = async (req, res) => {
+  console.log("Requête reçue pour post ID:", req.params.id);
+
+  // Vérifier d'abord la validité de l'ID
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
+
   try {
     const post = await Post.findById(req.params.id)
       .populate("auteur", "prenom email")
@@ -89,6 +97,7 @@ const getPostById = async (req, res) => {
 
     res.status(200).json({ post });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Erreur lors de la récupération du post", error: err.message });
   }
 };

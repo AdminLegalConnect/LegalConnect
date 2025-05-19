@@ -7,8 +7,11 @@ import DeposerPlainte from "./pages/DeposerPlainte";
 import MesPlaintes from "./pages/MesPlaintes";
 import PlainteDetail from "./pages/PlainteDetail";
 import Profile from "./pages/Profile"; // assure-toi que ce fichier existe bien
-import Forum from "./pages/Forum"; // adapte le chemin si nécessaire
 import CreatePost from "./pages/CreatePost"; // adapte le chemin si nécessaire
+import Forum from "./pages/Forum"; // ou le bon chemin relatif selon ton arborescence
+import ForumDetail from "./pages/ForumDetail"; // adapte le chemin si besoin
+
+
 
 
 
@@ -36,6 +39,10 @@ function App() {
       <Route path="/mes-avis/:id" element={<AvisDetail />} />
       <Route path="/thematiques" element={<Forum />} />
       <Route path="/forum/nouveau" element={<CreatePost />} />
+      <Route path="/forum" element={<Forum />} />
+      <Route path="/forum/:id" element={<ForumDetail />} />
+
+
 
 
 
