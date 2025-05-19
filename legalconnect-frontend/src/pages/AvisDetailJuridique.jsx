@@ -145,6 +145,28 @@ const AvisDetailJuridique = () => {
         </div>
       )}
 
+{!avis.participants?.includes(user._id) && (
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(`http://localhost:5000/api/avis/${avis._id}/suivre`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSuccess("Vous suivez maintenant cet avis !");
+        fetchAvis();
+      } catch (err) {
+        console.error(err);
+        setError("Erreur lors du suivi de l'avis.");
+      }
+    }}
+    style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1e40af", color: "white", border: "none", borderRadius: "6px" }}
+  >
+    Suivre cet avis
+  </button>
+)}
+
+
       {/* Coffre-fort : pièces jointes */}
       {avis.coffreFort && avis.coffreFort.length > 0 && (
         <div style={{ marginTop: "2rem" }}>

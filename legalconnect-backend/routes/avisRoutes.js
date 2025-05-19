@@ -13,6 +13,8 @@ const {
   deleteAvis,
   getAvisForParticulier,
   inviterParticipant,
+  getAvisSuivisParAvocat,
+  suivreAvis,
   updateAvis
 } = require('../controllers/avisController');
 
@@ -37,8 +39,27 @@ router.delete('/avis/:id', authMiddleware, deleteAvis);
 
 router.put('/avis/:id', authMiddleware, updateAvis);
 
+router.get("/mes-avis", authMiddleware, getAvisSuivisParAvocat);
+
 router.post('/avis/:id/inviter', authMiddleware, inviterParticipant);
 
+router.post("/avis/:id/suivre", authMiddleware, suivreAvis);
+
+router.post("/avis/:id/suivre", authMiddleware, async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis introuvable" });
+
+    if (!avis.participants.includes(req.user.id)) {
+      avis.participants.push(req.user.id);
+      await avis.save();
+    }
+
+    res.status(200).json({ message: "Avis suivi avec succès", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+});
 
 
 

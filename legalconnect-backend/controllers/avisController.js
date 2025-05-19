@@ -223,6 +223,35 @@ const inviterParticipant = async (req, res) => {
   }
 };
 
+const getAvisSuivisParAvocat = async (req, res) => {
+  try {
+    const avis = await Avis.find({ participants: req.user.id })
+      .populate("utilisateurId", "prenom nom email")
+      .sort({ dateDepot: -1 });
+
+    res.status(200).json({ avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
+
+const suivreAvis = async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis introuvable" });
+
+    if (!avis.participants.includes(req.user.id)) {
+      avis.participants.push(req.user.id);
+      await avis.save();
+    }
+
+    res.status(200).json({ message: "Avis suivi avec succès", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
+
+
 
 
 
@@ -235,6 +264,8 @@ module.exports = {
   getAvisById,
   deleteAvis,
   updateAvis,
-  inviterParticipant,          
+  inviterParticipant,
+  getAvisSuivisParAvocat, 
+  suivreAvis,         
   getAvisForParticulier
 };
