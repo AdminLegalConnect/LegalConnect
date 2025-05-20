@@ -284,10 +284,14 @@ const accepterProposition = async (req, res) => {
     const avis = await Avis.findById(req.params.id);
     if (!avis) return res.status(404).json({ message: "Avis introuvable" });
 
-    avis.propositions = avis.propositions.map(p => ({
-      ...p.toObject(),
-      statut: p._id.toString() === req.params.propId ? "acceptée" : "refusée"
-    }));
+    avis.propositions.forEach(p => {
+  if (p._id.toString() === req.params.propId) {
+    p.statut = "acceptée";
+  } else {
+    p.statut = "refusée";
+  }
+});
+
 
     await avis.save();
     res.status(200).json({ message: "Proposition acceptée", avis });

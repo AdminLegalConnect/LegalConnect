@@ -7,6 +7,8 @@ import { AuthContext } from "../services/AuthContext";
 const AvisDetailJuridique = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
+  const currentUserId = user?.id || user?._id || (typeof user === "string" ? user : null);
+  console.log("🔍 currentUserId:", currentUserId);
   const [avis, setAvis] = useState(null);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
@@ -24,6 +26,7 @@ const AvisDetailJuridique = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAvis(res.data.avis);
+      console.log("Avis rechargé :", res.data.avis);
       setStatus(res.data.avis.statut);
     } catch (err) {
       console.error(err);
@@ -34,6 +37,23 @@ const AvisDetailJuridique = () => {
   useEffect(() => {
     fetchAvis();
   }, [id]);
+
+  useEffect(() => {
+  // Rechargement automatique si une proposition devient "acceptée"
+  const hasAccepted = avis?.propositions?.some(p => {
+    const idA =
+  typeof p.avocatId === "object"
+    ? p.avocatId._id || p.avocatId.id
+    : p.avocatId;
+
+    const idB = currentUserId;
+    return idA?.toString() === idB?.toString() && p.statut === "acceptée";
+  });
+  if (hasAccepted) {
+    fetchAvis(); // 👈 recharge proprement la version peuplée à jour
+  }
+}, [avis?.propositions]);
+
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -99,6 +119,65 @@ const AvisDetailJuridique = () => {
 
   if (!avis) return <p style={{ padding: "2rem" }}>Chargement...</p>;
 
+const formStyle = { display: "block", marginBottom: "1rem", width: "100%", padding: "0.5rem" };
+
+const avocatDejaPropose = avis?.propositions?.some(p => {
+  const idA =
+  typeof p.avocatId === "object"
+    ? p.avocatId._id || p.avocatId.id
+    : p.avocatId;
+
+  const idB = currentUserId;
+  return idA?.toString() === idB?.toString();
+});
+
+
+
+const handleEvaluationSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const contenu = `
+🧾 Évaluation juridique officielle
+
+📝 Avis : ${form.avis.value}
+📅 Délai estimé : ${form.delai.value}
+💰 Prix approximatif : ${form.prix.value} €
+✅ Points forts : ${form.forts.value}
+⚠️ Points faibles : ${form.faibles.value}
+📊 Pourcentage de réussite : ${form.pourcentage.value} %
+📂 Éléments nécessaires : ${form.preuves.value}
+`;
+
+  const blob = new Blob([contenu], { type: "text/plain" });
+  const file = new File([blob], `rapport-juridique-${avis._id}.txt`, { type: "text/plain" });
+
+  const formData = new FormData();
+  formData.append("fichier", file);
+  formData.append("avisId", avis._id);
+  formData.append("description", "Rapport juridique rédigé par l'avocat");
+
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post("http://localhost:5000/api/avis/coffre-fort", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      }
+    });
+
+    setSuccess("Rapport généré et ajouté au coffre-fort !");
+    form.reset();
+    fetchAvis();
+  } catch (err) {
+    console.error(err);
+    setError("Erreur lors de l’ajout du rapport");
+  }
+};
+
+console.log("AVOCAT ID :", currentUserId);
+console.log("PROPOSITIONS :", avis.propositions);
+
+
   return (
     <div style={{ maxWidth: 800, margin: "2rem auto", padding: "2rem" }}>
       <h2 style={{ fontSize: "1.8rem", marginBottom: "1rem", color: "#1d4ed8" }}>
@@ -145,7 +224,7 @@ const AvisDetailJuridique = () => {
         </div>
       )}
 
-{avis.participants?.includes(user._id) ? (
+{avis.participants?.includes(currentUserId) ? (
   <p style={{ marginTop: "1rem", color: "green", fontWeight: "bold" }}>
     ✅ Vous suivez déjà cet avis.
   </p>
@@ -175,14 +254,14 @@ const AvisDetailJuridique = () => {
   style={{
     marginTop: "1rem",
     padding: "0.5rem 1rem",
-    backgroundColor: avis.participants?.includes(user._id) ? "#ef4444" : "#1e40af",
+    backgroundColor: avis.participants?.includes(currentUserId) ? "#ef4444" : "#1e40af",
     color: "white",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer"
   }}
 >
-  {avis.participants?.includes(user._id) ? "🚫 Ne plus suivre cet avis" : "🔔 Suivre cet avis"}
+  {avis.participants?.includes(currentUserId) ? "🚫 Ne plus suivre cet avis" : "🔔 Suivre cet avis"}
 </button>
 
 )}
@@ -191,41 +270,102 @@ const AvisDetailJuridique = () => {
 <div style={{ marginTop: "2rem" }}>
   <h3>Proposer une évaluation</h3>
 
-  {avis.propositions?.some(p => p.avocatId === user._id || p.avocatId?._id === user._id) ? (
-    <p style={{ color: "gray" }}>Vous avez déjà proposé une évaluation pour cet avis.</p>
-  ) : (
-    <form onSubmit={async (e) => {
-      e.preventDefault();
-      try {
-        const token = localStorage.getItem("token");
-        await axios.post(`http://localhost:5000/api/avis/${avis._id}/propositions`, {
-          prix: parseFloat(e.target.prix.value),
-          message: e.target.message.value
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setSuccess("Proposition envoyée avec succès !");
-        setError("");
-        fetchAvis();
-      } catch (err) {
-        console.error(err);
-        setError("Erreur lors de l'envoi de la proposition.");
-      }
-    }}>
-      <div style={{ marginBottom: "1rem" }}>
-        <label>Prix proposé (€) :</label><br />
-        <input name="prix" type="number" step="0.01" required style={{ width: "100%", padding: "0.5rem" }} />
-      </div>
-      <div style={{ marginBottom: "1rem" }}>
-        <label>Message à l'attention du particulier :</label><br />
-        <textarea name="message" rows={4} required style={{ width: "100%", padding: "0.5rem" }} />
-      </div>
-      <button type="submit" style={{ backgroundColor: "#2563EB", color: "white", border: "none", padding: "0.6rem 1.2rem", borderRadius: "8px" }}>
-        Soumettre la proposition
-      </button>
-    </form>
-  )}
+  {/* Logique intelligente selon le statut */}
+  {(() => {
+    const maProposition = avis.propositions?.find(p => {
+      const idA =
+  typeof p.avocatId === "object"
+    ? p.avocatId._id || p.avocatId.id
+    : p.avocatId;
+
+      return idA?.toString() === currentUserId?.toString();
+    });
+
+    console.log("Proposition trouvée :", maProposition);
+    const statut = maProposition?.statut;
+
+    if (!maProposition) {
+      // Aucun envoi → on affiche le formulaire
+      return (
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            const token = localStorage.getItem("token");
+            await axios.post(`http://localhost:5000/api/avis/${avis._id}/propositions`, {
+              prix: parseFloat(e.target.prix.value),
+              message: e.target.message.value
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setSuccess("Proposition envoyée avec succès !");
+            setError("");
+            fetchAvis();
+          } catch (err) {
+            console.error(err);
+            setError("Erreur lors de l'envoi de la proposition.");
+          }
+        }}>
+          <div style={{ marginBottom: "1rem" }}>
+            <label>Prix proposé (€) :</label><br />
+            <input name="prix" type="number" step="0.01" required style={{ width: "100%", padding: "0.5rem" }} />
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <label>Message à l'attention du particulier :</label><br />
+            <textarea name="message" rows={4} required style={{ width: "100%", padding: "0.5rem" }} />
+          </div>
+          <button type="submit" style={{ backgroundColor: "#2563EB", color: "white", border: "none", padding: "0.6rem 1.2rem", borderRadius: "8px" }}>
+            Soumettre la proposition
+          </button>
+        </form>
+      );
+    }
+
+    if (statut === "en attente") {
+      return <p style={{ color: "gray" }}>Vous avez déjà proposé une évaluation. En attente de réponse du particulier.</p>;
+    }
+
+    if (statut === "refusée") {
+      return <p style={{ color: "red" }}>Votre proposition a été refusée.</p>;
+    }
+
+    if (statut === "acceptée") {
+      return (
+        <div style={{ marginTop: "2rem" }}>
+          <h3>📝 Rédiger l’évaluation juridique officielle</h3>
+          <form onSubmit={handleEvaluationSubmit}>
+            <label>Avis de l’avocat :</label>
+            <textarea name="avis" required rows={4} style={formStyle} />
+
+            <label>Délai estimé :</label>
+            <input type="text" name="delai" required style={formStyle} />
+
+            <label>Prix approximatif :</label>
+            <input type="number" name="prix" required style={formStyle} />
+
+            <label>Points forts :</label>
+            <textarea name="forts" required rows={3} style={formStyle} />
+
+            <label>Points faibles :</label>
+            <textarea name="faibles" required rows={3} style={formStyle} />
+
+            <label>Pourcentage de réussite estimé :</label>
+            <input type="number" name="pourcentage" min={0} max={100} required style={formStyle} />
+
+            <label>Éléments ou preuves nécessaires :</label>
+            <textarea name="preuves" rows={3} style={formStyle} />
+
+            <button type="submit" style={{ ...formStyle, backgroundColor: "#2563eb", color: "white", cursor: "pointer" }}>
+              Générer le rapport et l’ajouter au coffre-fort
+            </button>
+          </form>
+        </div>
+      );
+    }
+
+    return null;
+  })()}
 </div>
+
 
 
 
