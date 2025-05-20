@@ -36,6 +36,22 @@ const [titre, setTitre] = useState("");
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const payerPourFichier = async (fichier) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post(`http://localhost:5000/api/avis/${avis._id}/payer`, {
+      fichier
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchavis();
+    setSuccess("✅ Paiement simulé, le fichier est maintenant accessible.");
+  } catch (err) {
+    console.error(err);
+    setError("Erreur lors du paiement");
+  }
+};
+
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [emailInvite, setEmailInvite] = useState("");
@@ -372,13 +388,40 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
       <p>Aucun fichier</p>
     ) : (
       <ul>
-        {avis.coffreFort.map((file, index) => (
-          <li key={index}>
-            <a href={`http://localhost:5000/${file.fichier}`} target="_blank" rel="noopener noreferrer">
-              {file.description || "Voir le fichier"}
-            </a>
-          </li>
-        ))}
+        {avis.coffreFort.map((file, index) => {
+  const accessible = !file.accessibleApresPaiement || avis.paiements?.some(
+    (p) => p.utilisateurId === user.id && p.fichier === file.fichier
+  );
+
+  return (
+    <li key={index}>
+      {accessible ? (
+        <a href={`http://localhost:5000/${file.fichier}`} target="_blank" rel="noopener noreferrer">
+          {file.description || "Voir le fichier"}
+        </a>
+      ) : (
+        <div>
+          <p>🔒 Rapport juridique accessible après paiement</p>
+          <button
+            onClick={() => payerPourFichier(file.fichier)}
+            style={{
+              backgroundColor: "#2563eb",
+              color: "white",
+              padding: "0.4rem 1rem",
+              border: "none",
+              borderRadius: "6px",
+              marginTop: "0.3rem",
+              cursor: "pointer"
+            }}
+          >
+            💳 Payer
+          </button>
+        </div>
+      )}
+    </li>
+  );
+})
+}
       </ul>
     )}
 
@@ -464,6 +507,8 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
     </>
   );
 };
+
+
 
 const styles = {
   container: { maxWidth: "700px", margin: "2rem auto", padding: "2rem" },

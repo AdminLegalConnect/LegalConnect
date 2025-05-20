@@ -66,9 +66,10 @@ const addCoffreFortFile = async (req, res) => {
     if (!avis) return res.status(404).json({ message: "Avis non trouvé." });
 
     avis.coffreFort.push({
-      fichier: req.file.path,
-      description
-    });
+  fichier: req.file.path,
+  description,
+  accessibleApresPaiement: description === "Rapport juridique rédigé par l'avocat"
+});
 
     await avis.save();
 
@@ -300,10 +301,21 @@ const accepterProposition = async (req, res) => {
   }
 };
 
+const simulerPaiement = async (req, res) => {
+  try {
+    const { fichier } = req.body;
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis non trouvé" });
 
+    avis.paiements = avis.paiements || [];
+    avis.paiements.push({ utilisateurId: req.user.id, fichier });
 
-
-
+    await avis.save();
+    res.status(200).json({ message: "Paiement simulé avec succès", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
 
 
 
@@ -320,6 +332,7 @@ module.exports = {
   getAvisSuivisParAvocat, 
   suivreAvis,
   proposerEvaluation,
-  accepterProposition,         
+  accepterProposition,
+  simulerPaiement,         
   getAvisForParticulier
 };

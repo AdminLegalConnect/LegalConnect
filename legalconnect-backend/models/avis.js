@@ -41,8 +41,14 @@ const avisSchema = new mongoose.Schema({
       fichier: { type: String }, // Lien vers les fichiers
       description: { type: String },
       dateAjout: { type: Date, default: Date.now },
+      accessibleApresPaiement: { type: Boolean, default: false } // 🆕
     },
-  ], // Coffre-fort pour ajouter des documents
+  ],
+   paiements: [{
+  utilisateurId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  fichier: { type: String },
+  date: { type: Date, default: Date.now }
+}],
   dateDepot: { type: Date, default: Date.now },
 }, { timestamps: true });
 

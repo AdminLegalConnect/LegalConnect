@@ -17,7 +17,7 @@ const {
   suivreAvis,
   accepterProposition,
   proposerEvaluation,
-
+  simulerPaiement,
   updateAvis
 } = require('../controllers/avisController');
 
@@ -51,6 +51,9 @@ router.post("/avis/:id/suivre", authMiddleware, suivreAvis);
 router.post("/avis/:id/propositions", authMiddleware, proposerEvaluation);
 
 router.patch("/avis/:id/propositions/:propId/accepter", authMiddleware, accepterProposition);
+
+router.post("/avis/:id/payer", authMiddleware, simulerPaiement);
+
 
 
 module.exports = router;
