@@ -18,6 +18,7 @@ const {
   deleteComplaint,
   getPublicComplaintById,
   retirerParticipant,
+  suivrePlainte,
 } = require("../controllers/complaintController");
 
 // Routes de base pour les plaintes
@@ -35,6 +36,8 @@ router.delete(
   authMiddleware,
   retirerParticipant
 );
+router.post("/complaints/:id/suivre", authMiddleware, suivrePlainte);
+
 
 
 // Routes pour les fonctionnalités spécifiques

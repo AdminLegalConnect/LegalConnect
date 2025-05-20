@@ -116,7 +116,7 @@ const updateComplaint = async (req, res) => {
 // ✅ Mettre à jour uniquement le statut
 const updateComplaintStatus = async (req, res) => {
   try {
-    const complaint = await Complaint.findById(req.params.id);
+    const complaint = await Complaint.findById(req.params.id).populate("utilisateur", "prenom nom email");
 
     if (!complaint) {
       return res.status(404).json({ error: "Plainte non trouvée" });
@@ -141,7 +141,8 @@ const updateComplaintStatus = async (req, res) => {
 // ✅ Ajouter un message dans le chat d'une plainte
 const addChatMessage = async (req, res) => {
   try {
-    const complaint = await Complaint.findById(req.params.id);
+    const complaint = await Complaint.findById(req.params.id).populate("utilisateur", "prenom nom email");
+
 
     if (!complaint) {
       return res.status(404).json({ error: "Plainte non trouvée" });
@@ -322,7 +323,7 @@ const updateVisibilite = async (req, res) => {
 
 const deleteComplaint = async (req, res) => {
   try {
-    const complaint = await Complaint.findById(req.params.id);
+    const complaint = await Complaint.findById(req.params.id).populate("utilisateur", "prenom nom email");
 
     if (!complaint) {
       return res.status(404).json({ error: "Plainte non trouvée" });
@@ -387,6 +388,27 @@ const retirerParticipant = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+const suivrePlainte = async (req, res) => {
+  console.log("🔥 Route /suivre appelée pour plainte", req.params.id);
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) return res.status(404).json({ message: "Plainte introuvable" });
+
+    const userId = req.user.id;
+
+    if (complaint.participants.includes(userId)) {
+      complaint.participants = complaint.participants.filter((id) => id.toString() !== userId);
+    } else {
+      complaint.participants.push(userId);
+    }
+
+    await complaint.save();
+    res.status(200).json({ message: "Mise à jour du suivi réussie", complaint });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
+
 
 
 
@@ -408,4 +430,5 @@ module.exports = {
   deleteComplaint,
   getPublicComplaintById,
   retirerParticipant,
+  suivrePlainte,
 };

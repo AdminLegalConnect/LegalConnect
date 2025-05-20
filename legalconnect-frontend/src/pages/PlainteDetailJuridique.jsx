@@ -133,6 +133,29 @@ const PlainteDetailJuridique = () => {
       <button onClick={() => navigate(-1)} style={{ marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" }}>
         ⬅ Retour
       </button>
+
+      {complaint.participants?.includes(user?.id) ? (
+  <p style={{ color: "green", marginTop: "1rem" }}>✅ Vous suivez cette plainte.</p>
+) : (
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem("token");
+        console.log("SUITE URL :", `http://localhost:5000/api/complaints/${id}/suivre`);
+        const res = await axios.post(`http://localhost:5000/api/complaints/${id}/suivre`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setComplaint(res.data.complaint);
+      } catch (err) {
+        console.error(err);
+      }
+    }}
+    style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1e40af", color: "white", borderRadius: "6px", border: "none", cursor: "pointer" }}
+  >
+    🔔 Suivre cette plainte
+  </button>
+)}
+
     </div>
   );
 };
