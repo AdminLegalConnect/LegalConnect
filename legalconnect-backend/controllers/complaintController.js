@@ -403,7 +403,13 @@ const suivrePlainte = async (req, res) => {
     }
 
     await complaint.save();
-    res.status(200).json({ message: "Mise à jour du suivi réussie", complaint });
+
+const populatedComplaint = await Complaint.findById(req.params.id)
+  .populate("utilisateur", "prenom nom email")
+  .populate("participants", "prenom nom email");
+
+res.status(200).json({ message: "Mise à jour du suivi réussie", complaint: populatedComplaint });
+
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }

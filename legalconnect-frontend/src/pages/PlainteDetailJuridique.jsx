@@ -134,14 +134,11 @@ const PlainteDetailJuridique = () => {
         ⬅ Retour
       </button>
 
-      {complaint.participants?.includes(user?.id) ? (
-  <p style={{ color: "green", marginTop: "1rem" }}>✅ Vous suivez cette plainte.</p>
-) : (
+      {complaint.participants?.map(p => p._id?.toString()).includes(user?.id) ? (
   <button
     onClick={async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("SUITE URL :", `http://localhost:5000/api/complaints/${id}/suivre`);
         const res = await axios.post(`http://localhost:5000/api/complaints/${id}/suivre`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -150,11 +147,30 @@ const PlainteDetailJuridique = () => {
         console.error(err);
       }
     }}
-    style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1e40af", color: "white", borderRadius: "6px", border: "none", cursor: "pointer" }}
+    style={styles.unfollowButton}
+  >
+    ❌ Ne plus suivre cette plainte
+  </button>
+) : (
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post(`http://localhost:5000/api/complaints/${id}/suivre`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setComplaint(res.data.complaint);
+      } catch (err) {
+        console.error(err);
+      }
+    }}
+    style={styles.followButton}
   >
     🔔 Suivre cette plainte
   </button>
 )}
+
+
 
     </div>
   );
@@ -166,6 +182,25 @@ const styles = {
   button: { padding: "0.5rem 1rem", backgroundColor: "#2563EB", color: "white", border: "none", borderRadius: "6px", marginTop: "1rem" },
   chatBox: { maxHeight: "300px", overflowY: "auto", padding: "1rem", border: "1px solid #ccc", borderRadius: "8px" },
   message: { backgroundColor: "#f3f4f6", padding: "0.8rem", borderRadius: "6px", marginBottom: "0.5rem" },
+  followButton: {
+  marginTop: "1rem",
+  padding: "0.5rem 1rem",
+  backgroundColor: "#1e40af",
+  color: "white",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer",
+},
+unfollowButton: {
+  marginTop: "1rem",
+  padding: "0.5rem 1rem",
+  backgroundColor: "#991b1b",
+  color: "white",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer",
+},
+
 };
 
 export default PlainteDetailJuridique;
