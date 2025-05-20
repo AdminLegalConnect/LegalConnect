@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import SuiviJuridique from "../components/SuiviJuridique";
 
 const PlainteDetailJuridique = () => {
   const { id } = useParams();
@@ -67,6 +68,8 @@ const PlainteDetailJuridique = () => {
         <button onClick={() => setActiveTab("chat")} style={activeTab === "chat" ? styles.activeTab : styles.tab}>Chat</button>
         <button onClick={() => setActiveTab("files")} style={activeTab === "files" ? styles.activeTab : styles.tab}>Coffre-fort</button>
         <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
+        <button onClick={() => setActiveTab("suivi")} style={activeTab === "suivi" ? styles.activeTab : styles.tab}>Suivi juridique</button>
+
       </div>
 
       {activeTab === "details" && (
@@ -129,6 +132,9 @@ const PlainteDetailJuridique = () => {
           <button onClick={() => navigator.clipboard.writeText(window.location.href)} style={styles.button}>Partager / Copier le lien</button>
         </div>
       )}
+      {activeTab === "suivi" && (
+  <SuiviJuridique plainteId={id} />
+)}
 
       <button onClick={() => navigate(-1)} style={{ marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" }}>
         ⬅ Retour

@@ -11,6 +11,8 @@ const complaintRoutes = require("./routes/complaintRoutes"); // Ajout des routes
 const homeRoutes = require("./routes/homeRoutes"); // Ajout des routes pour l'accueil
 const avisRoutes = require("./routes/avisRoutes"); // Routes pour les avis
 const forumRoutes = require("./routes/forumRoutes");
+const etapeJuridiqueRoutes = require("./routes/etapeJuridiqueRoutes");
+
 
 
 const app = express();
@@ -25,6 +27,7 @@ app.use("/api", authRoutes);      // Pour /api/signup et /api/login
 app.use("/api", userRoutes);      // Routes liées aux utilisateurs
 app.use("/api", profilRoutes);    // Routes pour le profil utilisateur
 app.use("/api", complaintRoutes); // Routes pour les plaintes
+app.use("/api", etapeJuridiqueRoutes);
 app.use("/api", homeRoutes);      // Routes d'accueil
 app.use("/api", avisRoutes);      // Routes pour les avis
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
