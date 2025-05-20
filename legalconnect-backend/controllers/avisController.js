@@ -240,16 +240,22 @@ const suivreAvis = async (req, res) => {
     const avis = await Avis.findById(req.params.id);
     if (!avis) return res.status(404).json({ message: "Avis introuvable" });
 
-    if (!avis.participants.includes(req.user.id)) {
+    const index = avis.participants.indexOf(req.user.id);
+
+    if (index === -1) {
       avis.participants.push(req.user.id);
       await avis.save();
+      return res.status(200).json({ message: "Avis suivi avec succès", avis, suivi: true });
+    } else {
+      avis.participants.splice(index, 1);
+      await avis.save();
+      return res.status(200).json({ message: "Vous ne suivez plus cet avis", avis, suivi: false });
     }
-
-    res.status(200).json({ message: "Avis suivi avec succès", avis });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
+
 
 
 

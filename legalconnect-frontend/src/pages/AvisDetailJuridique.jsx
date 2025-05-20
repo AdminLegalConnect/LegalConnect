@@ -151,36 +151,40 @@ const AvisDetailJuridique = () => {
   </p>
 ) : (
   <button
-    onClick={async () => {
-      try {
-        const token = localStorage.getItem("token");
-        await axios.post(`http://localhost:5000/api/avis/${avis._id}/suivre`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  onClick={async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`http://localhost:5000/api/avis/${avis._id}/suivre`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setAvis(prev => ({
-          ...prev,
-          participants: [...(prev.participants || []), user._id]
-        }));
+      const updatedParticipants = res.data.avis.participants;
 
-        setSuccess("✅ Vous suivez maintenant cet avis !");
-      } catch (err) {
-        console.error(err);
-        setError("Erreur lors du suivi de l'avis.");
-      }
-    }}
-    style={{
-      marginTop: "1rem",
-      padding: "0.5rem 1rem",
-      backgroundColor: "#1e40af",
-      color: "white",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer"
-    }}
-  >
-    🔔 Suivre cet avis
-  </button>
+      setAvis((prev) => ({
+      ...prev,
+      participants: updatedParticipants
+    }));
+      setSuccess(res.data.message);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors du changement de suivi.");
+      setSuccess("");
+    }
+  }}
+  style={{
+    marginTop: "1rem",
+    padding: "0.5rem 1rem",
+    backgroundColor: avis.participants?.includes(user._id) ? "#ef4444" : "#1e40af",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer"
+  }}
+>
+  {avis.participants?.includes(user._id) ? "🚫 Ne plus suivre cet avis" : "🔔 Suivre cet avis"}
+</button>
+
 )}
 
 
