@@ -38,21 +38,24 @@ const AvisDetailJuridique = () => {
     fetchAvis();
   }, [id]);
 
-  useEffect(() => {
-  // Rechargement automatique si une proposition devient "acceptée"
+  const [alreadyRefreshed, setAlreadyRefreshed] = useState(false);
+
+useEffect(() => {
   const hasAccepted = avis?.propositions?.some(p => {
     const idA =
-  typeof p.avocatId === "object"
-    ? p.avocatId._id || p.avocatId.id
-    : p.avocatId;
-
+      typeof p.avocatId === "object"
+        ? p.avocatId._id || p.avocatId.id
+        : p.avocatId;
     const idB = currentUserId;
     return idA?.toString() === idB?.toString() && p.statut === "acceptée";
   });
-  if (hasAccepted) {
-    fetchAvis(); // 👈 recharge proprement la version peuplée à jour
+
+  if (hasAccepted && !alreadyRefreshed) {
+    fetchAvis(); // ✅ recharge une seule fois
+    setAlreadyRefreshed(true); // 🔒 on ne relance plus après
   }
-}, [avis?.propositions]);
+}, [avis?.propositions, currentUserId]);
+
 
 
   const handleSendMessage = async () => {
@@ -136,6 +139,7 @@ const avocatDejaPropose = avis?.propositions?.some(p => {
 const handleEvaluationSubmit = async (e) => {
   e.preventDefault();
   const form = e.target;
+
   const contenu = `
 🧾 Évaluation juridique officielle
 
@@ -146,7 +150,7 @@ const handleEvaluationSubmit = async (e) => {
 ⚠️ Points faibles : ${form.faibles.value}
 📊 Pourcentage de réussite : ${form.pourcentage.value} %
 📂 Éléments nécessaires : ${form.preuves.value}
-`;
+`.trim();
 
   const blob = new Blob([contenu], { type: "text/plain" });
   const file = new File([blob], `rapport-juridique-${avis._id}.txt`, { type: "text/plain" });
@@ -161,18 +165,21 @@ const handleEvaluationSubmit = async (e) => {
     await axios.post("http://localhost:5000/api/avis/coffre-fort", formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
 
-    setSuccess("Rapport généré et ajouté au coffre-fort !");
+    setSuccess("✅ Rapport généré et ajouté au coffre-fort !");
+    setError("");
     form.reset();
     fetchAvis();
   } catch (err) {
     console.error(err);
-    setError("Erreur lors de l’ajout du rapport");
+    setError("❌ Erreur lors de l’ajout du rapport");
+    setSuccess("");
   }
 };
+
 
 console.log("AVOCAT ID :", currentUserId);
 console.log("PROPOSITIONS :", avis.propositions);
