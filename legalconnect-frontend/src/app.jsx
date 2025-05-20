@@ -15,6 +15,8 @@ import MesAvis from "./pages/MesAvis";
 import AvisDetail from "./pages/AvisDetail";
 import MainLayout from "./components/Layout/MainLayout"; 
 import ChercherAvis from "./pages/ChercherAvis";
+import AvisDetailJuridique from "./pages/AvisDetailJuridique";
+
 
 function App() {
   return (
@@ -40,6 +42,8 @@ function App() {
         <Route path="/forum/:id" element={<ForumDetail />} />
         <Route path="/recherche-avis" element={<ChercherAvis />} />
         <Route path="/avis/:id" element={<AvisDetail />} />
+        <Route path="/juridique/avis/:id" element={<AvisDetailJuridique />} />
+
       </Route>
     </Routes>
   );
