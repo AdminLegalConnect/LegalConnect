@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Routes, Route } from "react-router-dom";
+import { AuthContext } from "./services/AuthContext";
 import Login from "./components/Login/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -13,28 +14,27 @@ import ForumDetail from "./pages/ForumDetail";
 import DeposerAvis from "./pages/DeposerAvis";
 import MesAvis from "./pages/MesAvis";
 import AvisDetail from "./pages/AvisDetail";
-import MainLayout from "./components/Layout/MainLayout"; 
+import MainLayout from "./components/Layout/MainLayout";
 import ChercherAvis from "./pages/ChercherAvis";
 import AvisDetailJuridique from "./pages/AvisDetailJuridique";
 import FacturationJuridique from "./pages/FacturationJuridique";
 import ChercherPlainte from "./pages/ChercherPlainte";
 import PlainteDetailJuridique from "./pages/PlainteDetailJuridique";
 
-
-
 function App() {
+  const { user } = useContext(AuthContext); // ✅
+
   return (
     <Routes>
-      {/* Routes sans header */}
       <Route path="/" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-
-      {/* Routes avec header via layout */}
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/deposer-plainte" element={<DeposerPlainte />} />
         <Route path="/mes-plaintes" element={<MesPlaintes />} />
-        <Route path="/mes-plaintes/:id" element={<PlainteDetail />} />
+        <Route path="/mes-plaintes/:id" element={
+          user?.role === "juridique" ? <PlainteDetailJuridique /> : <PlainteDetail />
+        } />
         <Route path="/profil" element={<Profile />} />
         <Route path="/deposer-dossier" element={<DeposerAvis />} />
         <Route path="/deposer-avis" element={<DeposerAvis />} />
@@ -50,7 +50,6 @@ function App() {
         <Route path="/facturation" element={<FacturationJuridique />} />
         <Route path="/recherche-plainte" element={<ChercherPlainte />} />
         <Route path="/plainte-juridique/:id" element={<PlainteDetailJuridique />} />
-
       </Route>
     </Routes>
   );
