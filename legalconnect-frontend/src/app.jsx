@@ -18,6 +18,7 @@ import ChercherAvis from "./pages/ChercherAvis";
 import AvisDetailJuridique from "./pages/AvisDetailJuridique";
 import FacturationJuridique from "./pages/FacturationJuridique";
 import ChercherPlainte from "./pages/ChercherPlainte";
+import PlainteDetailJuridique from "./pages/PlainteDetailJuridique";
 
 
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/juridique/avis/:id" element={<AvisDetailJuridique />} />
         <Route path="/facturation" element={<FacturationJuridique />} />
         <Route path="/recherche-plainte" element={<ChercherPlainte />} />
+        <Route path="/plainte-juridique/:id" element={<PlainteDetailJuridique />} />
 
       </Route>
     </Routes>

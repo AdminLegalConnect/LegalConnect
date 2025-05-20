@@ -30,7 +30,7 @@ const ChercherPlainte = () => {
   }, [user]);
 
   const handleClick = (id) => {
-    navigate(`/mes-plaintes/${id}`);
+    navigate(`/plainte-juridique/${id}`);
   };
 
   return (
