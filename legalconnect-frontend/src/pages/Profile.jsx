@@ -146,10 +146,20 @@ const Profile = () => {
         </form>
 
         <button onClick={handleDeleteAccount} style={styles.deleteButton}>Supprimer mon compte</button>
+      {profile?.role === "juridique" && (
+  <button
+    onClick={() => navigate("/facturation")}
+    style={{ marginTop: "1.5rem", ...styles.button }}
+  >
+    🧾 Voir ma facturation
+  </button>
+)}
       </div>
     </>
   );
 };
+
+
 
 const styles = {
   container: {

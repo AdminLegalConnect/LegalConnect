@@ -16,6 +16,8 @@ import AvisDetail from "./pages/AvisDetail";
 import MainLayout from "./components/Layout/MainLayout"; 
 import ChercherAvis from "./pages/ChercherAvis";
 import AvisDetailJuridique from "./pages/AvisDetailJuridique";
+import FacturationJuridique from "./pages/FacturationJuridique";
+
 
 
 function App() {
@@ -43,6 +45,7 @@ function App() {
         <Route path="/recherche-avis" element={<ChercherAvis />} />
         <Route path="/avis/:id" element={<AvisDetail />} />
         <Route path="/juridique/avis/:id" element={<AvisDetailJuridique />} />
+        <Route path="/facturation" element={<FacturationJuridique />} />
 
       </Route>
     </Routes>
