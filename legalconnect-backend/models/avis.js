@@ -6,6 +6,20 @@ const avisSchema = new mongoose.Schema({
   titre: { type: String, required: true },
   description: { type: String, required: true },
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  propositions: [
+  {
+    avocatId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    prix: Number,
+    message: String,
+    statut: {
+      type: String,
+      enum: ["en attente", "acceptée", "refusée"],
+      default: "en attente"
+    },
+    date: { type: Date, default: Date.now }
+  }
+],
+
   statut: { type: String, enum: ["en attente", "en cours", "résolu"], default: "en attente" },  // Statut de l'avis
   historiqueStatut: [
   {

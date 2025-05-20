@@ -126,6 +126,8 @@ const getAvisById = async (req, res) => {
       .populate('participants', 'prenom email') // 👈 ajoute cette ligne
       .populate('utilisateurId', 'prenom nom email')
       .populate("historiqueStatut.modifiéPar", "prenom nom email")
+      .populate('propositions.avocatId', 'prenom nom email')
+
 
 
     if (!avis) {
@@ -256,6 +258,46 @@ const suivreAvis = async (req, res) => {
   }
 };
 
+const proposerEvaluation = async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis introuvable" });
+
+    const dejaPropose = avis.propositions.some(p => p.avocatId.toString() === req.user.id);
+    if (dejaPropose) return res.status(400).json({ message: "Vous avez déjà proposé une évaluation." });
+
+    avis.propositions.push({
+      avocatId: req.user.id,
+      prix: req.body.prix,
+      message: req.body.message
+    });
+
+    await avis.save();
+    res.status(200).json({ message: "Proposition enregistrée.", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de la proposition", error: err.message });
+  }
+};
+
+const accepterProposition = async (req, res) => {
+  try {
+    const avis = await Avis.findById(req.params.id);
+    if (!avis) return res.status(404).json({ message: "Avis introuvable" });
+
+    avis.propositions = avis.propositions.map(p => ({
+      ...p.toObject(),
+      statut: p._id.toString() === req.params.propId ? "acceptée" : "refusée"
+    }));
+
+    await avis.save();
+    res.status(200).json({ message: "Proposition acceptée", avis });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de l’acceptation", error: err.message });
+  }
+};
+
+
+
 
 
 
@@ -272,6 +314,8 @@ module.exports = {
   updateAvis,
   inviterParticipant,
   getAvisSuivisParAvocat, 
-  suivreAvis,         
+  suivreAvis,
+  proposerEvaluation,
+  accepterProposition,         
   getAvisForParticulier
 };

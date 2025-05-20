@@ -248,6 +248,57 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
     <div>
       <p><strong>Titre :</strong> {titre}</p>
       <p><strong>Description :</strong> {description}</p>
+      {avis.propositions && avis.propositions.length > 0 && (
+  <div style={{ marginTop: "2rem" }}>
+    <h3>💼 Propositions d’évaluation reçues</h3>
+    {avis.propositions.map((prop) => (
+      <div key={prop._id} style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: "8px",
+        padding: "1rem",
+        marginBottom: "1rem",
+        backgroundColor: prop.statut === "acceptée" ? "#d1fae5" :
+                         prop.statut === "refusée" ? "#fee2e2" : "#f9fafb"
+      }}>
+        <p><strong>Avocat :</strong> {prop.avocatId?.prenom || "Nom inconnu"} ({prop.avocatId?.email})</p>
+        <p><strong>Prix proposé :</strong> {prop.prix} €</p>
+        <p><strong>Message :</strong> {prop.message}</p>
+        <p><strong>Statut :</strong> {prop.statut}</p>
+
+        {prop.statut === "en attente" && (
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem("token");
+                await axios.patch(`http://localhost:5000/api/avis/${avis._id}/propositions/${prop._id}/accepter`, {}, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                setSuccess("Proposition acceptée !");
+                setError("");
+                fetchavis();
+              } catch (err) {
+                console.error(err);
+                setError("Erreur lors de l’acceptation de la proposition");
+              }
+            }}
+            style={{
+              marginTop: "0.5rem",
+              backgroundColor: "#10b981",
+              color: "white",
+              border: "none",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            ✅ Accepter cette proposition
+          </button>
+        )}
+      </div>
+    ))}
+  </div>
+)}
+
     </div>
   )
 )}

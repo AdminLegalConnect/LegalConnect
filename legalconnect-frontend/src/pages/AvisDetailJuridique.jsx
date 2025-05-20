@@ -187,6 +187,47 @@ const AvisDetailJuridique = () => {
 
 )}
 
+{/* Proposition d’évaluation */}
+<div style={{ marginTop: "2rem" }}>
+  <h3>Proposer une évaluation</h3>
+
+  {avis.propositions?.some(p => p.avocatId === user._id || p.avocatId?._id === user._id) ? (
+    <p style={{ color: "gray" }}>Vous avez déjà proposé une évaluation pour cet avis.</p>
+  ) : (
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(`http://localhost:5000/api/avis/${avis._id}/propositions`, {
+          prix: parseFloat(e.target.prix.value),
+          message: e.target.message.value
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSuccess("Proposition envoyée avec succès !");
+        setError("");
+        fetchAvis();
+      } catch (err) {
+        console.error(err);
+        setError("Erreur lors de l'envoi de la proposition.");
+      }
+    }}>
+      <div style={{ marginBottom: "1rem" }}>
+        <label>Prix proposé (€) :</label><br />
+        <input name="prix" type="number" step="0.01" required style={{ width: "100%", padding: "0.5rem" }} />
+      </div>
+      <div style={{ marginBottom: "1rem" }}>
+        <label>Message à l'attention du particulier :</label><br />
+        <textarea name="message" rows={4} required style={{ width: "100%", padding: "0.5rem" }} />
+      </div>
+      <button type="submit" style={{ backgroundColor: "#2563EB", color: "white", border: "none", padding: "0.6rem 1.2rem", borderRadius: "8px" }}>
+        Soumettre la proposition
+      </button>
+    </form>
+  )}
+</div>
+
+
 
 
 
