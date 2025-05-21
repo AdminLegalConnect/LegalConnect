@@ -12,14 +12,23 @@ const fileSchema = new mongoose.Schema({
 // ✅ Définir un sous-schema pour les paiements
 const paiementSchema = new mongoose.Schema({
   type: { type: String, enum: ["honoraires", "huissier", "autre"], required: true },
+  typePaiement: { type: String, enum: ["individuel", "partagé"], default: "individuel" },
   montant: { type: Number, required: true },
   description: { type: String },
-  payeurs: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  destinataire: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  fichier: { type: String }, // lien vers une facture stockée dans le coffre-fort ou ailleurs
   statut: { type: String, enum: ["en attente", "partiellement payé", "payé"], default: "en attente" },
+  destinataire: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  fichier: { type: String }, // lien facture PDF, optionnel
+  participants: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      montant: { type: Number, required: true },
+      statut: { type: String, enum: ["en attente", "payé"], default: "en attente" },
+      date_paiement: { type: Date }
+    }
+  ],
   date: { type: Date, default: Date.now }
 }, { _id: true });
+
 
 // ✅ Définir le schema principal pour les plaintes
 const complaintSchema = new mongoose.Schema({

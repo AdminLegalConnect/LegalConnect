@@ -13,7 +13,13 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(tokenSansBearer, process.env.JWT_SECRET);
 
     // On récupère l'utilisateur complet à partir de l'ID décodé
-    const user = await User.findById(decoded.id);
+    const userId = decoded.id || decoded._id; // 👈 on couvre les 2 cas
+    const user = await User.findById(userId);
+
+    req.user = {
+  ...user.toObject(), // on récupère toutes les infos
+  id: user._id.toString(), // 👈 important : assure que `.id` existe
+};
 
     if (!user) {
       return res.status(401).json({ error: "Utilisateur non trouvé." });

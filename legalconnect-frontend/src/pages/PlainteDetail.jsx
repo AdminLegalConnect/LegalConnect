@@ -53,16 +53,22 @@ const PlainteDetail = () => {
 
   useEffect(() => {
   const fetchPaiements = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPaiements(res.data);
-    } catch (err) {
-      console.error("Erreur lors du chargement des paiements :", err);
-    }
-  };
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/complaints/${id}/paiements`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    setPaiements(response.data);
+  } catch (error) {
+    console.error("Erreur lors du chargement des paiements :", error);
+  }
+};
+
+
   fetchPaiements();
 }, [id]);
 
@@ -414,19 +420,66 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
         {activeTab === "paiements" && (
   <div>
     <h3>💸 Paiements en lien avec cette plainte</h3>
-    {paiements.length === 0 ? (
-      <p>Aucun paiement pour cette plainte.</p>
-    ) : (
-      paiements.map((p, i) => (
-        <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
-          <strong>Type :</strong> {p.type} <br />
-          <strong>Montant :</strong> {p.montant}€ <br />
-          <strong>Description :</strong> {p.description} <br />
-          <strong>Status :</strong> {p.status || "en attente"} <br />
-          <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email}
-        </div>
-      ))
-    )}
+    {!paiements || paiements.length === 0 ? (
+  <p>Aucun paiement pour cette plainte.</p>
+) : (
+  paiements.map((p, i) => {
+    const maPart = p.participants?.find(pr => (pr.user === user._id || pr.user === user.id));
+    const aPayer = p.typePaiement === "partagé" ? maPart?.montant : p.montant;
+    const dejaPaye = p.typePaiement === "partagé" ? maPart?.statut === "payé" : p.status === "payé";
+
+    return (
+      <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
+        <strong>Type :</strong> {p.type} <br />
+        <strong>Montant :</strong> {p.montant}€ <br />
+        <strong>Description :</strong> {p.description} <br />
+        <strong>Status :</strong> {p.status || "en attente"} <br />
+        <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email} <br />
+        <strong>Votre part :</strong> {aPayer}€ <br />
+        <strong>Statut :</strong> {dejaPaye ? "✅ Payé" : "❌ À payer"} <br />
+
+        {!dejaPaye && (
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        console.log("➡️ ID utilisateur pour paiement (via context) :", user?.id || user?._id);
+
+        await axios.patch(
+          `http://localhost:5000/api/complaints/${id}/paiements/${p._id}/part`,
+          {}, // ✅ body vide (plus besoin de passer userId)
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // ✅ important : inclure "Bearer "
+            },
+          }
+        );
+
+        fetchPaiements(); // ✅ recharge les paiements à jour
+      } catch (err) {
+        console.error("❌ Erreur lors du paiement de la part :", err.response?.data || err);
+      }
+    }}
+    style={{
+      marginTop: "0.5rem",
+      backgroundColor: "#16a34a",
+      color: "white",
+      border: "none",
+      padding: "0.4rem 0.8rem",
+      borderRadius: "6px",
+      cursor: "pointer",
+    }}
+  >
+    💳 Payer ma part
+  </button>
+)}
+
+      </div>
+    );
+  })
+)}
+
   </div>
 )}
 

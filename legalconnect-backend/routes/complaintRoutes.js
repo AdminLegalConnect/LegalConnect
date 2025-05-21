@@ -20,7 +20,8 @@ const {
   retirerParticipant,
   suivrePlainte,
   simulerPaiement,
-  getPaiements
+  getPaiements,
+  payerPart
 } = require("../controllers/complaintController");
 
 // Routes de base pour les plaintes
@@ -57,5 +58,6 @@ router.delete(
 // ✅ Routes de gestion des paiements
 router.post("/complaints/:id/paiement", authMiddleware, simulerPaiement);
 router.get("/complaints/:id/paiements", authMiddleware, getPaiements);
+router.patch("/complaints/:id/paiements/:pid/part", authMiddleware, payerPart);
 
 module.exports = router;
