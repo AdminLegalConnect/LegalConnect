@@ -414,6 +414,49 @@ res.status(200).json({ message: "Mise à jour du suivi réussie", complaint: pop
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
+// ✅ Simuler ou demander un paiement pour une plainte
+const simulerPaiement = async (req, res) => {
+  try {
+    const { type, montant, description, destinataire, fichier } = req.body;
+    const plainte = await Complaint.findById(req.params.id);
+    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+
+    plainte.paiements.push({
+      type,
+      montant,
+      description,
+      destinataire,
+      fichier,
+      payeurs: [req.user.id],
+      statut: "en attente",
+      date: new Date()
+    });
+
+    await plainte.save();
+
+    res.status(200).json({ message: "Paiement enregistré avec succès", plainte });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+// ✅ Récupérer les paiements d'une plainte
+const getPaiements = async (req, res) => {
+  try {
+    const plainte = await Complaint.findById(req.params.id)
+      .populate("paiements.payeurs", "prenom nom email")
+      .populate("paiements.destinataire", "prenom nom email");
+
+    if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
+
+    res.status(200).json(plainte.paiements || []);
+  } catch (err) {
+    console.error("Erreur getPaiements :", err);
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+
 
 
 
@@ -437,4 +480,6 @@ module.exports = {
   getPublicComplaintById,
   retirerParticipant,
   suivrePlainte,
+  simulerPaiement,
+  getPaiements,
 };

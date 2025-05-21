@@ -16,6 +16,14 @@ const PlainteDetailJuridique = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [paiementForm, setPaiementForm] = useState({
+  type: "honoraires",
+  montant: "",
+  description: "",
+  fichier: null
+});
+const [paiements, setPaiements] = useState([]);
+
 
   const fetchComplaint = async () => {
     try {
@@ -29,6 +37,25 @@ const PlainteDetailJuridique = () => {
       setError("Erreur lors du chargement de la plainte");
     }
   };
+
+  const fetchPaiements = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setPaiements(res.data);
+  } catch (err) {
+    console.error("Erreur de chargement des paiements", err);
+  }
+};
+
+useEffect(() => {
+  if (activeTab === "paiements") {
+    fetchPaiements();
+  }
+}, [activeTab]);
+
 
   useEffect(() => { fetchComplaint(); }, [id]);
 
@@ -55,6 +82,26 @@ const PlainteDetailJuridique = () => {
     }
   };
 
+const demanderPaiement = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post(`http://localhost:5000/api/complaints/${id}/paiement`, {
+      ...paiementForm,
+      destinataire: user.id
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setSuccess("Demande de paiement enregistrée !");
+    setPaiementForm({ type: "honoraires", montant: "", description: "", fichier: null });
+    fetchPaiements(); // recharge les paiements visibles
+  } catch (err) {
+    console.error(err);
+    setError("Erreur lors de la demande de paiement.");
+  }
+};
+
+
+
   if (!complaint) return <p style={{ padding: "2rem" }}>Chargement...</p>;
 
   return (
@@ -69,6 +116,7 @@ const PlainteDetailJuridique = () => {
         <button onClick={() => setActiveTab("files")} style={activeTab === "files" ? styles.activeTab : styles.tab}>Coffre-fort</button>
         <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
         <button onClick={() => setActiveTab("suivi")} style={activeTab === "suivi" ? styles.activeTab : styles.tab}>Suivi juridique</button>
+        <button onClick={() => setActiveTab("paiements")} style={activeTab === "paiements" ? styles.activeTab : styles.tab}>Paiements</button>
 
       </div>
 
@@ -135,6 +183,48 @@ const PlainteDetailJuridique = () => {
       {activeTab === "suivi" && (
   <SuiviJuridique plainteId={id} />
 )}
+
+{activeTab === "paiements" && (
+  <div>
+    <h3>Demander un paiement</h3>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
+      <select value={paiementForm.type} onChange={(e) => setPaiementForm({ ...paiementForm, type: e.target.value })}>
+        <option value="honoraires">Honoraires</option>
+        <option value="huissier">Huissier</option>
+        <option value="autre">Autre</option>
+      </select>
+      <input
+        type="number"
+        placeholder="Montant en €"
+        value={paiementForm.montant}
+        onChange={(e) => setPaiementForm({ ...paiementForm, montant: e.target.value })}
+      />
+      <textarea
+        placeholder="Description"
+        value={paiementForm.description}
+        onChange={(e) => setPaiementForm({ ...paiementForm, description: e.target.value })}
+      />
+      {/* (Plus tard : ajouter upload fichier) */}
+      <button onClick={demanderPaiement} style={styles.button}>📩 Demander le paiement</button>
+    </div>
+  </div>
+)}
+<h4 style={{ marginTop: "1rem" }}>Paiements demandés :</h4>
+{paiements.length === 0 ? (
+  <p>Aucun paiement enregistré pour cette plainte.</p>
+) : (
+  paiements.map((p, i) => (
+    <div key={i} style={{ border: "1px solid #ccc", padding: "0.5rem", marginBottom: "0.5rem", borderRadius: "6px" }}>
+      <strong>Type :</strong> {p.type}<br />
+      <strong>Montant :</strong> {p.montant}€<br />
+      <strong>Description :</strong> {p.description}<br />
+      <strong>Status :</strong> {p.statut}<br />
+      <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email}
+    </div>
+  ))
+)}
+
+
 
       <button onClick={() => navigate(-1)} style={{ marginTop: "2rem", background: "none", border: "none", color: "#2563EB", cursor: "pointer" }}>
         ⬅ Retour
