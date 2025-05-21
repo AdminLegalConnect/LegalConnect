@@ -12,7 +12,6 @@ const fileSchema = new mongoose.Schema({
 // ✅ Définir un sous-schema pour les paiements
 const paiementSchema = new mongoose.Schema({
   type: { type: String, enum: ["honoraires", "huissier", "autre"], required: true },
-  typePaiement: { type: String, enum: ["individuel", "partagé"], default: "individuel" },
   montant: { type: Number, required: true },
   description: { type: String },
   statut: { type: String, enum: ["en attente", "partiellement payé", "payé"], default: "en attente" },

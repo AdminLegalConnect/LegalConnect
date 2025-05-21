@@ -27,6 +27,7 @@ const PlainteDetail = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [emailInvite, setEmailInvite] = useState("");
   const [paiements, setPaiements] = useState([]);
+  const [montantsLibres, setMontantsLibres] = useState({});
 
 
   const fetchComplaint = async () => {
@@ -54,19 +55,30 @@ const PlainteDetail = () => {
   useEffect(() => {
   const fetchPaiements = async () => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/complaints/${id}/paiements`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    setPaiements(response.data);
-  } catch (error) {
-    console.error("Erreur lors du chargement des paiements :", error);
+    const token = localStorage.getItem("token");
+  const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+    });
+
+
+    const paiementsAvecStatut = res.data.map((p) => {
+      const totalPaye = p.participants?.reduce((sum, part) => sum + (part.montant || 0), 0);
+      const dejaPayeParMoi = p.participants?.some((part) => part.user === user?.id);
+      return {
+        ...p,
+        totalPaye,
+        dejaPayeParMoi,
+      };
+    });
+
+    setPaiements(paiementsAvecStatut);
+  } catch (err) {
+    console.error("Erreur fetchPaiements:", err);
   }
 };
+
 
 
   fetchPaiements();
@@ -427,6 +439,19 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
     const maPart = p.participants?.find(pr => (pr.user === user._id || pr.user === user.id));
     const aPayer = p.typePaiement === "partagé" ? maPart?.montant : p.montant;
     const dejaPaye = p.typePaiement === "partagé" ? maPart?.statut === "payé" : p.status === "payé";
+{/* Contributions déjà faites */}
+{p.participants?.length > 0 && (
+  <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+    <strong>Contributions :</strong>
+    <ul>
+      {p.participants.map((part, index) => (
+        <li key={index}>
+          {part.user?.prenom || part.user?.email || "Utilisateur inconnu"} : {part.montant} €
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
     return (
       <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
@@ -434,46 +459,101 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
         <strong>Montant :</strong> {p.montant}€ <br />
         <strong>Description :</strong> {p.description} <br />
         <strong>Status :</strong> {p.status || "en attente"} <br />
+        {p.statut === "payé" && (
+  <div style={{ marginTop: "0.5rem", color: "green", fontWeight: "bold" }}>
+    ✅ Paiement réglé dans sa totalité
+  </div>
+)}
+
         <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email} <br />
         <strong>Votre part :</strong> {aPayer}€ <br />
         <strong>Statut :</strong> {dejaPaye ? "✅ Payé" : "❌ À payer"} <br />
 
-        {!dejaPaye && (
-  <button
-    onClick={async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        console.log("➡️ ID utilisateur pour paiement (via context) :", user?.id || user?._id);
-
-        await axios.patch(
-          `http://localhost:5000/api/complaints/${id}/paiements/${p._id}/part`,
-          {}, // ✅ body vide (plus besoin de passer userId)
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // ✅ important : inclure "Bearer "
-            },
-          }
-        );
-
-        fetchPaiements(); // ✅ recharge les paiements à jour
-      } catch (err) {
-        console.error("❌ Erreur lors du paiement de la part :", err.response?.data || err);
+        {!p.dejaPayeParMoi && p.statut !== "payé" && (
+  <div style={{ marginTop: "0.5rem" }}>
+    <input
+      type="number"
+      placeholder="Montant à payer (€)"
+      value={montantsLibres[p._id] || ""}
+      onChange={(e) =>
+        setMontantsLibres({ ...montantsLibres, [p._id]: e.target.value })
       }
-    }}
-    style={{
-      marginTop: "0.5rem",
-      backgroundColor: "#16a34a",
-      color: "white",
-      border: "none",
-      padding: "0.4rem 0.8rem",
-      borderRadius: "6px",
-      cursor: "pointer",
-    }}
-  >
-    💳 Payer ma part
-  </button>
+      style={{
+        marginRight: "0.5rem",
+        padding: "0.4rem",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+      }}
+    />
+    <button
+      onClick={async () => {
+        const montant = parseFloat(montantsLibres[p._id]);
+        const token = localStorage.getItem("token");
+        console.log("➡️ Montant saisi :", montant);
+        console.log("➡️ Paiement ID :", p._id);
+        console.log("➡️ Plainte ID :", id);
+        console.log("➡️ Token utilisé :", token?.slice(0, 20) + "...");
+
+        if (!montant || montant <= 0) {
+          alert("Veuillez entrer un montant valide.");
+          return;
+        }
+
+        try {
+          const res = await axios.patch(
+            `http://localhost:5000/api/complaints/${id}/paiements/${p._id}/part`,
+            { montant },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          console.log("✅ Réponse paiement :", res.data);
+
+          setMontantsLibres({ ...montantsLibres, [p._id]: "" });
+
+          // Recharge les données à jour
+          await fetchComplaint();
+          const tokenBis = localStorage.getItem("token");
+          const resPaiements = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+            headers: { Authorization: `Bearer ${tokenBis}` },
+          });
+
+          const paiementsAvecStatut = resPaiements.data.map((p) => {
+            const totalPaye = p.participants?.reduce((sum, part) => sum + (part.montant || 0), 0);
+            const dejaPayeParMoi = p.participants?.some((part) => part.user === (user?._id || user?.id));
+            return {
+              ...p,
+              totalPaye,
+              dejaPayeParMoi,
+            };
+          });
+
+          setPaiements(paiementsAvecStatut);
+        } catch (err) {
+          console.error("❌ Erreur lors du paiement :", err.response?.data || err);
+          alert("Paiement échoué : " + (err.response?.data?.error || err.message));
+        }
+      }}
+      style={{
+        backgroundColor: "#16a34a",
+        color: "white",
+        border: "none",
+        padding: "0.4rem 0.8rem",
+        borderRadius: "6px",
+        cursor: "pointer",
+      }}
+    >
+      💳 Payer cette somme
+    </button>
+  </div>
 )}
+
+
+
+
 
       </div>
     );

@@ -422,15 +422,16 @@ const simulerPaiement = async (req, res) => {
     if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
 
     plainte.paiements.push({
-      type,
-      montant,
-      description,
-      destinataire,
-      fichier,
-      payeurs: [req.user.id],
-      statut: "en attente",
-      date: new Date()
-    });
+  type,
+  montant,
+  description,
+  destinataire,
+  fichier,
+  participants: [],
+  statut: "en attente",
+  date: new Date()
+});
+
 
     await plainte.save();
 
@@ -461,48 +462,48 @@ const getPaiements = async (req, res) => {
 
 const payerPart = async (req, res) => {
   try {
+    const { montant } = req.body;
     const plainte = await Complaint.findById(req.params.id);
     if (!plainte) return res.status(404).json({ error: "Plainte non trouvée" });
 
     const paiement = plainte.paiements.id(req.params.pid);
     if (!paiement) return res.status(404).json({ error: "Paiement non trouvé" });
 
-    if (paiement.typePaiement !== "partagé") {
-      return res.status(400).json({ error: "Ce paiement n'est pas partagé" });
+    if (!montant || isNaN(montant) || montant <= 0) {
+      return res.status(400).json({ error: "Montant invalide" });
     }
 
-    const participant = paiement.participants.find(p => p.user.toString() === req.user._id.toString());
-    if (!participant) {
-      return res.status(403).json({ error: "Vous n'êtes pas concerné par ce paiement" });
-    }
+  
+  const part = {
+  user: req.user._id,
+  montant: parseFloat(montant),
+  statut: "payé",
+  date_paiement: new Date()
+  };
 
-    if (participant.statut === "payé") {
-      return res.status(400).json({ error: "Part déjà réglée" });
-    }
+  paiement.participants.push(part);
 
-    // Simuler le paiement
-    participant.statut = "payé";
-    participant.date_paiement = new Date();
 
-    // Met à jour le statut global
-    const totalParticipants = paiement.participants.length;
-    const totalPayes = paiement.participants.filter(p => p.statut === "payé").length;
 
-    if (totalPayes === 0) {
-      paiement.statut = "en attente";
-    } else if (totalPayes < totalParticipants) {
+    // 🔢 recalcul du montant payé
+    const totalPaye = paiement.participants.reduce((sum, p) => sum + p.montant, 0);
+
+    if (totalPaye >= paiement.montant) {
+      paiement.statut = "payé";
+    } else if (totalPaye > 0) {
       paiement.statut = "partiellement payé";
     } else {
-      paiement.statut = "payé";
+      paiement.statut = "en attente";
     }
 
     await plainte.save();
-    res.status(200).json({ message: "Part payée", paiement });
+    res.status(200).json({ message: "Part ajoutée", paiement });
   } catch (err) {
     console.error("Erreur payerPart:", err);
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+
 
 
 
