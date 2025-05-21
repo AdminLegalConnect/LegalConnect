@@ -26,6 +26,8 @@ const PlainteDetail = () => {
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [emailInvite, setEmailInvite] = useState("");
+  const [paiements, setPaiements] = useState([]);
+
 
   const fetchComplaint = async () => {
     try {
@@ -48,6 +50,22 @@ const PlainteDetail = () => {
   };
 
   useEffect(() => { fetchComplaint(); }, [id]);
+
+  useEffect(() => {
+  const fetchPaiements = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPaiements(res.data);
+    } catch (err) {
+      console.error("Erreur lors du chargement des paiements :", err);
+    }
+  };
+  fetchPaiements();
+}, [id]);
+
 
   useEffect(() => {
   if (complaint?.chat?.length) {
@@ -225,6 +243,12 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
           {user && (
             <button onClick={() => setActiveTab("settings")} style={activeTab === "settings" ? styles.activeTab : styles.tab}>Paramètres</button>
           )}
+          {user && (
+  <button onClick={() => setActiveTab("paiements")} style={activeTab === "paiements" ? styles.activeTab : styles.tab}>
+    Paiements
+  </button>
+)}
+
         </div>
 
         {success && <p style={{ color: "green" }}>{success}</p>}
@@ -310,7 +334,7 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
         {activeTab === "files" && (
           <div>
             <h3>Fichiers :</h3>
-            {complaint.coffre_fort.length === 0 ? <p>Aucun fichier</p> : (
+            {!complaint.coffre_fort || complaint.coffre_fort.length === 0 ? <p>Aucun fichier</p> : (
               <ul>
                 {complaint.coffre_fort.map((file) => (
                   <li key={file._id}>
@@ -386,6 +410,27 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
 
           </div>
         )}
+
+        {activeTab === "paiements" && (
+  <div>
+    <h3>💸 Paiements en lien avec cette plainte</h3>
+    {paiements.length === 0 ? (
+      <p>Aucun paiement pour cette plainte.</p>
+    ) : (
+      paiements.map((p, i) => (
+        <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
+          <strong>Type :</strong> {p.type} <br />
+          <strong>Montant :</strong> {p.montant}€ <br />
+          <strong>Description :</strong> {p.description} <br />
+          <strong>Status :</strong> {p.status || "en attente"} <br />
+          <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email}
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+
 
         <button onClick={() => navigate("/mes-plaintes")} style={styles.back}>⬅ Retour</button>
       </div>
