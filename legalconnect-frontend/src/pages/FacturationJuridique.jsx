@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
+
 
 const FacturationJuridique = () => {
   const [paiements, setPaiements] = useState([]);
@@ -26,7 +30,6 @@ const FacturationJuridique = () => {
     return p.source === filtre;
   });
 
-  // ➕ Regrouper les paiements par plainte (titre), puis par date
   const paiementsGroupes = paiementsFiltres.reduce((acc, p) => {
     const key = p.titre || "Autre";
     if (!acc[key]) acc[key] = [];
@@ -34,13 +37,43 @@ const FacturationJuridique = () => {
     return acc;
   }, {});
 
+  const genererPDF = (titre, paiementsAssocies) => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Cabinet LegalConnect", 14, 20);
+    doc.setFontSize(12);
+    doc.text(`Facture : ${titre}`, 14, 30);
+    doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 14, 37);
+
+    doc.autoTable({
+      startY: 45,
+      head: [["Acheteur", "Type", "Montant (€)", "Date", "Statut"]],
+      body: paiementsAssocies.map((p) => [
+        `${p.acheteur?.prenom || ""} ${p.acheteur?.nom || ""} (${p.acheteur?.email || "?"})`,
+        p.source === "avis" ? "Avis" : "Plainte",
+        p.montantEstime,
+        new Date(p.date).toLocaleDateString("fr-FR"),
+        p.statut === "payé" ? "Payé" : "En attente",
+      ]),
+    });
+
+    const totalHT = paiementsAssocies.reduce((sum, p) => sum + Number(p.montantEstime || 0), 0);
+    const tva = (totalHT * 0.2).toFixed(2);
+    const totalTTC = (totalHT + parseFloat(tva)).toFixed(2);
+
+    doc.text(`Total HT : ${totalHT.toFixed(2)} €`, 14, doc.lastAutoTable.finalY + 10);
+    doc.text(`TVA (20%) : ${tva} €`, 14, doc.lastAutoTable.finalY + 17);
+    doc.text(`Total TTC : ${totalTTC} €`, 14, doc.lastAutoTable.finalY + 24);
+
+    doc.save(`Facture_${titre.replace(/\s+/g, "_")}.pdf`);
+  };
+
   return (
     <div style={{ padding: "2rem", maxWidth: 1000, margin: "auto" }}>
       <h2 style={{ marginBottom: "1rem", color: "#1e3a8a" }}>
         💼 Historique de vos paiements reçus
       </h2>
 
-      {/* Sélecteur de filtre */}
       <div style={{ marginBottom: "1.5rem" }}>
         <label><strong>Filtrer par type :</strong> </label>{" "}
         <select value={filtre} onChange={(e) => setFiltre(e.target.value)} style={{ padding: "0.5rem" }}>
@@ -82,11 +115,10 @@ const FacturationJuridique = () => {
               </div>
             ))}
 
-            {/* ✅ Bouton facturation global à venir */}
-            {filtre === "plainte" && (
+            {filtre !== "avis" && (
               <div style={{ marginTop: "1rem", textAlign: "right" }}>
                 <button
-                  onClick={() => alert(`Génération de facture pour ${titre} (à implémenter)`)}
+                  onClick={() => genererPDF(titre, paiementsAssocies)}
                   style={{
                     backgroundColor: "#1d4ed8",
                     color: "#fff",
