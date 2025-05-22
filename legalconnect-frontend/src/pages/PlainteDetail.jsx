@@ -54,14 +54,16 @@ const PlainteDetail = () => {
 
   useEffect(() => {
   const fetchPaiements = async () => {
-  try {
-    const token = localStorage.getItem("token");
-  const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-    });
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.warn("Aucun token détecté, fetchPaiements annulé.");
+    return;
+  }
 
+  try {
+    const res = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     const paiementsAvecStatut = res.data.map((p) => {
       const totalPaye = p.participants?.reduce((sum, part) => sum + (part.montant || 0), 0);
@@ -80,9 +82,9 @@ const PlainteDetail = () => {
 };
 
 
-
   fetchPaiements();
-}, [id]);
+}, [id, user]);
+
 
 
   useEffect(() => {
@@ -433,135 +435,145 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
   <div>
     <h3>💸 Paiements en lien avec cette plainte</h3>
     {!paiements || paiements.length === 0 ? (
-  <p>Aucun paiement pour cette plainte.</p>
-) : (
-  paiements.map((p, i) => {
-    const maPart = p.participants?.find(pr => (pr.user === user._id || pr.user === user.id));
-    const aPayer = p.typePaiement === "partagé" ? maPart?.montant : p.montant;
-    const dejaPaye = p.typePaiement === "partagé" ? maPart?.statut === "payé" : p.status === "payé";
-{/* Contributions déjà faites */}
-{p.participants?.length > 0 && (
-  <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-    <strong>Contributions :</strong>
-    <ul>
-      {p.participants.map((part, index) => (
-        <li key={index}>
-          {part.user?.prenom || part.user?.email || "Utilisateur inconnu"} : {part.montant} €
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+      <p>Aucun paiement pour cette plainte.</p>
+    ) : (
+      paiements.map((p, i) => {
+  const maPart = user ? p.participants?.find(pr => pr.user === (user._id || user.id)) : null;
+  const aPayer = p.typePaiement === "partagé" ? maPart?.montant : p.montant;
+  const dejaPaye = p.typePaiement === "partagé" ? maPart?.statut === "payé" : p.statut === "payé";
+  const paiementRegle = p.totalPaye >= p.montant;
+
+  return (
+    <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
+      {paiementRegle && (
+        <div style={{ marginBottom: "0.5rem", color: "green", fontWeight: "bold" }}>
+          ✅ Paiement réglé dans sa totalité
+        </div>
+      )}
+      <strong>Type :</strong> {p.type} <br />
+      <strong>Montant :</strong> {p.montant}€ <br />
+      <strong>Description :</strong> {p.description} <br />
+      <strong>Status :</strong> {p.status || "en attente"} <br />
+      <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email} <br />
+      <strong>Votre part :</strong> {aPayer ?? "-"}€ <br />
+      <strong>Statut :</strong>{" "}
+      <span style={{ color: dejaPaye ? "green" : "red", fontWeight: "bold" }}>
+        {dejaPaye ? "✅ Payé" : "❌ À payer"}
+      </span>
+      <br />
+
+      {/* Liste des contributions */}
+      {p.participants?.length > 0 && (
+        <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+          <strong>Contributions :</strong>
+         <ul>
+  {p.participants.map((part, index) => {
+    const idPart = typeof part.user === "object" ? part.user._id : part.user;
+    const userContrib = complaint.participants?.find(
+  (cp) => String(cp._id) === String(idPart)
+) || (String(complaint.utilisateur?._id) === String(idPart) ? complaint.utilisateur : null);
+
+const nomAffiche =
+  userContrib?.prenom || userContrib?.email || "Utilisateur inconnu";
+
 
     return (
-      <div key={i} style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "6px", marginBottom: "1rem" }}>
-        <strong>Type :</strong> {p.type} <br />
-        <strong>Montant :</strong> {p.montant}€ <br />
-        <strong>Description :</strong> {p.description} <br />
-        <strong>Status :</strong> {p.status || "en attente"} <br />
-        {p.statut === "payé" && (
-  <div style={{ marginTop: "0.5rem", color: "green", fontWeight: "bold" }}>
-    ✅ Paiement réglé dans sa totalité
-  </div>
-)}
-
-        <strong>Demandé par :</strong> {p.destinataire?.prenom || p.destinataire?.email} <br />
-        <strong>Votre part :</strong> {aPayer}€ <br />
-        <strong>Statut :</strong> {dejaPaye ? "✅ Payé" : "❌ À payer"} <br />
-
-        {!p.dejaPayeParMoi && p.statut !== "payé" && (
-  <div style={{ marginTop: "0.5rem" }}>
-    <input
-      type="number"
-      placeholder="Montant à payer (€)"
-      value={montantsLibres[p._id] || ""}
-      onChange={(e) =>
-        setMontantsLibres({ ...montantsLibres, [p._id]: e.target.value })
-      }
-      style={{
-        marginRight: "0.5rem",
-        padding: "0.4rem",
-        borderRadius: "6px",
-        border: "1px solid #ccc",
-      }}
-    />
-    <button
-      onClick={async () => {
-        const montant = parseFloat(montantsLibres[p._id]);
-        const token = localStorage.getItem("token");
-        console.log("➡️ Montant saisi :", montant);
-        console.log("➡️ Paiement ID :", p._id);
-        console.log("➡️ Plainte ID :", id);
-        console.log("➡️ Token utilisé :", token?.slice(0, 20) + "...");
-
-        if (!montant || montant <= 0) {
-          alert("Veuillez entrer un montant valide.");
-          return;
-        }
-
-        try {
-          const res = await axios.patch(
-            `http://localhost:5000/api/complaints/${id}/paiements/${p._id}/part`,
-            { montant },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          console.log("✅ Réponse paiement :", res.data);
-
-          setMontantsLibres({ ...montantsLibres, [p._id]: "" });
-
-          // Recharge les données à jour
-          await fetchComplaint();
-          const tokenBis = localStorage.getItem("token");
-          const resPaiements = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
-            headers: { Authorization: `Bearer ${tokenBis}` },
-          });
-
-          const paiementsAvecStatut = resPaiements.data.map((p) => {
-            const totalPaye = p.participants?.reduce((sum, part) => sum + (part.montant || 0), 0);
-            const dejaPayeParMoi = p.participants?.some((part) => part.user === (user?._id || user?.id));
-            return {
-              ...p,
-              totalPaye,
-              dejaPayeParMoi,
-            };
-          });
-
-          setPaiements(paiementsAvecStatut);
-        } catch (err) {
-          console.error("❌ Erreur lors du paiement :", err.response?.data || err);
-          alert("Paiement échoué : " + (err.response?.data?.error || err.message));
-        }
-      }}
-      style={{
-        backgroundColor: "#16a34a",
-        color: "white",
-        border: "none",
-        padding: "0.4rem 0.8rem",
-        borderRadius: "6px",
-        cursor: "pointer",
-      }}
-    >
-      💳 Payer cette somme
-    </button>
-  </div>
-)}
-
-
-
-
-
-      </div>
+      <li key={index}>
+        {nomAffiche} : {part?.montant} € {part?.statut === "payé" ? "✅" : ""}
+      </li>
     );
-  })
-)}
+  })}
+</ul>
 
+
+        </div>
+      )}
+
+      {/* Champ paiement */}
+      {!p.dejaPayeParMoi && !paiementRegle && (
+        <div style={{ marginTop: "0.5rem" }}>
+          <input
+            type="number"
+            placeholder="Montant à payer (€)"
+            value={montantsLibres[p._id] || ""}
+            onChange={(e) =>
+              setMontantsLibres({ ...montantsLibres, [p._id]: e.target.value })
+            }
+            style={{
+              marginRight: "0.5rem",
+              padding: "0.4rem",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+            }}
+          />
+          <button
+            onClick={async () => {
+              const montant = parseFloat(montantsLibres[p._id]);
+              const token = localStorage.getItem("token");
+
+              if (!montant || montant <= 0) {
+                alert("Veuillez entrer un montant valide.");
+                return;
+              }
+
+              try {
+                await axios.patch(
+                  `http://localhost:5000/api/complaints/${id}/paiements/${p._id}/part`,
+                  { montant },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+
+                setMontantsLibres({ ...montantsLibres, [p._id]: "" });
+                await fetchComplaint();
+
+                const resPaiements = await axios.get(`http://localhost:5000/api/complaints/${id}/paiements`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const paiementsAvecStatut = resPaiements.data.map((paiement) => {
+                  const totalPaye = paiement.participants?.reduce((sum, part) => sum + (part.montant || 0), 0);
+                  const dejaPayeParMoi = paiement.participants?.some((part) => part.user === (user?._id || user?.id));
+                  const statut = totalPaye >= paiement.montant ? "payé" : paiement.status || "en attente";
+                  return {
+                    ...paiement,
+                    totalPaye,
+                    dejaPayeParMoi,
+                    statut,
+                  };
+                });
+
+                setPaiements(paiementsAvecStatut);
+              } catch (err) {
+                console.error("❌ Erreur lors du paiement :", err.response?.data || err);
+                alert("Paiement échoué : " + (err.response?.data?.error || err.message));
+              }
+            }}
+            style={{
+              backgroundColor: "#16a34a",
+              color: "white",
+              border: "none",
+              padding: "0.4rem 0.8rem",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            💳 Payer cette somme
+          </button>
+        </div>
+      )}
+    </div>
+  );
+})
+
+    )}
   </div>
 )}
+
+
 
 
 
