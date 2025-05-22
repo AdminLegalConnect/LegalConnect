@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
-
-
+import autoTable from "jspdf-autotable";
 
 const FacturationJuridique = () => {
   const [paiements, setPaiements] = useState([]);
-  const [filtre, setFiltre] = useState("tous"); // tous, avis, plainte
+  const [filtre, setFiltre] = useState("tous");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,13 +37,14 @@ const FacturationJuridique = () => {
 
   const genererPDF = (titre, paiementsAssocies) => {
     const doc = new jsPDF();
+
     doc.setFontSize(16);
     doc.text("Cabinet LegalConnect", 14, 20);
     doc.setFontSize(12);
     doc.text(`Facture : ${titre}`, 14, 30);
     doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 14, 37);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 45,
       head: [["Acheteur", "Type", "Montant (€)", "Date", "Statut"]],
       body: paiementsAssocies.map((p) => [
