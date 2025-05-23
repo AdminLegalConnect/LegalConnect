@@ -60,36 +60,42 @@ const changePassword = async (req, res) => {
 // ⭐ POST /api/profil/note
 const ajouterNote = async (req, res) => {
   try {
-    const { professionnelId, valeur } = req.body;
-    const utilisateur = req.user;
+    const { avocatId, note, commentaire, plainteId } = req.body;
+    const utilisateurId = req.user.id;
 
-    if (!valeur || valeur < 1 || valeur > 5) {
-      return res.status(400).json({ message: "Note invalide. Elle doit être entre 1 et 5." });
+    if (!avocatId || !note || !plainteId) {
+      return res.status(400).json({ message: "Informations incomplètes." });
     }
 
-    const professionnel = await User.findById(professionnelId);
-    if (!professionnel || professionnel.role !== "juridique") {
-      return res.status(404).json({ message: "Professionnel introuvable." });
+    const avocat = await User.findById(avocatId);
+    if (!avocat || avocat.role !== "juridique") {
+      return res.status(404).json({ message: "Avocat introuvable." });
     }
 
-    // Vérifier si l'utilisateur a déjà noté ce professionnel
-    const dejaNote = professionnel.notes.find(note => note.auteurId.toString() === utilisateur.id);
+    // Empêche les doublons : 1 note par utilisateur et par plainte
+    const dejaNote = avocat.notes?.some(
+      (n) => n.utilisateur?.toString() === utilisateurId && n.plainte?.toString() === plainteId
+    );
+
     if (dejaNote) {
-      return res.status(400).json({ message: "Vous avez déjà noté ce professionnel." });
+      return res.status(400).json({ message: "Vous avez déjà noté cet avocat pour cette plainte." });
     }
 
-    professionnel.notes.push({
-      auteurId: utilisateur.id,
-      valeur
+    avocat.notes.push({
+      utilisateur: utilisateurId,
+      plainte: plainteId,
+      note,
+      commentaire,
     });
 
-    await professionnel.save();
-
-    res.status(200).json({ message: "Note ajoutée avec succès." });
-  } catch (err) {
-    res.status(500).json({ message: "Erreur lors de l'ajout de la note.", error: err.message });
+    await avocat.save();
+    res.status(200).json({ message: "Note enregistrée avec succès." });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la note:", error);
+    res.status(500).json({ message: "Erreur serveur lors de l'ajout de la note." });
   }
 };
+
 
 // 💬 POST /api/profil/commentaire
 const ajouterCommentaire = async (req, res) => {

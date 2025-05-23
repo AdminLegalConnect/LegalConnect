@@ -121,6 +121,15 @@ const updateComplaintStatus = async (req, res) => {
     if (!complaint) {
       return res.status(404).json({ error: "Plainte non trouvée" });
     }
+    
+    // ✅ Empêcher les non-créateurs de clore la plainte
+if (["résolue", "fermée"].includes(req.body.statut)) {
+  const auteurPlainte = String(complaint.utilisateur?._id || complaint.utilisateur);
+  const utilisateurActuel = String(req.user.id);
+  if (auteurPlainte !== utilisateurActuel) {
+    return res.status(403).json({ message: "Seul le créateur peut clôturer la plainte." });
+  }
+}
 
     complaint.statut = req.body.statut;
     complaint.date_maj = new Date();
@@ -137,6 +146,7 @@ const updateComplaintStatus = async (req, res) => {
     });
   }
 };
+
 
 // ✅ Ajouter un message dans le chat d'une plainte
 const addChatMessage = async (req, res) => {
@@ -330,7 +340,7 @@ const deleteComplaint = async (req, res) => {
     }
 
     // Optionnel : Vérifier que l'utilisateur est propriétaire de la plainte
-    if (complaint.utilisateur.toString() !== req.user.id) {
+    if (String(complaint.utilisateur) !== String(req.user.id)) {
       return res.status(403).json({ error: "Accès non autorisé" });
     }
 

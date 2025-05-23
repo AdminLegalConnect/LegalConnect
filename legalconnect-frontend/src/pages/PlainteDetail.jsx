@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import NotationJuridique from "../components/NotationJuridique";
 
 const PlainteDetail = () => {
   const { id } = useParams();
@@ -241,7 +242,7 @@ const PlainteDetail = () => {
 console.log("Contenu de user depuis le context :", user)
 
   if (!complaint) return <p style={{ padding: "2rem" }}>Chargement...</p>;
-const isCreator = user && complaint.utilisateur && (user._id === complaint.utilisateur._id || user.id === complaint.utilisateur._id);
+const isCreator = user && complaint.utilisateur && String(user.id) === String(complaint.utilisateur._id);
 
   return (
     <>
@@ -421,6 +422,38 @@ const isCreator = user && complaint.utilisateur && (user._id === complaint.utili
               </div>
             )}
 
+            {isCreator && complaint.statut !== "résolue" && (
+  <button
+    onClick={async () => {
+      if (!window.confirm("Clôturer définitivement cette plainte ?")) return;
+      try {
+        const token = localStorage.getItem("token");
+        await axios.put(`http://localhost:5000/api/complaints/${id}/status`, {
+          statut: "résolue"
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSuccess("Plainte clôturée avec succès !");
+        fetchComplaint();
+      } catch (err) {
+        console.error(err);
+        setError("Erreur lors de la clôture de la plainte");
+      }
+    }}
+    style={{
+      backgroundColor: "#16a34a",
+      color: "white",
+      border: "none",
+      padding: "0.8rem",
+      borderRadius: "8px",
+      cursor: "pointer"
+    }}
+  >
+    ✅ Clôturer la plainte
+  </button>
+)}
+
+
             <button onClick={handleCopyLink} style={styles.button}>Partager / Copier le lien</button>
             {user && complaint.utilisateur && (user._id || user.id) === complaint.utilisateur._id && (
   <button onClick={handleDeleteComplaint} style={styles.deleteButton}>
@@ -572,6 +605,27 @@ const nomAffiche =
     )}
   </div>
 )}
+
+{complaint?.statut === "résolue" && user?.role === "particulier" && (
+  <div style={{ marginTop: "2rem" }}>
+    <h3>Vous pouvez maintenant évaluer le traitement de cette plainte :</h3>
+    {complaint.participants
+      ?.filter((p) => p.role === "juridique")
+      .map((avocat) => (
+        <div key={avocat._id} style={{ marginBottom: "1.5rem" }}>
+          <p><strong>Avocat :</strong> {avocat.prenom || avocat.email}</p>
+          <NotationJuridique
+  avocatId={avocat._id}
+  avocatNom={avocat.prenom || avocat.email}
+  plainteId={complaint._id}
+  onSubmitSuccess={() => alert("Note envoyée !")}
+/>
+
+        </div>
+      ))}
+  </div>
+)}
+
 
 
 
