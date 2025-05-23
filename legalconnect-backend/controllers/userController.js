@@ -1,25 +1,34 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
+
 // ✅ GET /api/profil
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .populate('avis', 'titre')  // Peupler le tableau "avis" avec les titres des avis
-      .select("-password"); // Exclure le mot de passe pour des raisons de sécurité
+      .populate('avis', 'titre')
+      .select("-password");
 
     if (!user) {
       return res.status(404).json({ error: "Utilisateur non trouvé." });
     }
 
+    // Calcul de la note moyenne pour les juridiques
+    let moyenneNote = null;
+    if (user.role === "juridique" && user.notes.length > 0) {
+      const total = user.notes.reduce((acc, n) => acc + (n.valeur || 0), 0);
+      moyenneNote = parseFloat((total / user.notes.length).toFixed(2));
+    }
+
     res.status(200).json({
       message: "Profil utilisateur récupéré avec succès.",
-      profil: user,
+      profil: { ...user.toObject(), moyenneNote },
     });
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 };
+
 
 // ✅ PUT /api/profil
 const updateProfile = async (req, res) => {

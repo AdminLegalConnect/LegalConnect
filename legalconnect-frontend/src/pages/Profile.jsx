@@ -133,6 +133,12 @@ const Profile = () => {
           <input type="text" name="ville" placeholder="Ville" value={form.ville || ""} onChange={handleChange} style={styles.input} />
           <input type="text" name="specialite" placeholder="Spécialité" value={form.specialite || ""} onChange={handleChange} style={styles.input} />
           <input type="url" name="siteInternet" placeholder="Site Internet" value={form.siteInternet || ""} onChange={handleChange} style={styles.input} />
+          {profile?.role === "juridique" && profile?.moyenneNote && (
+  <p style={{ fontSize: "1rem", color: "#2563EB", fontWeight: "bold" }}>
+    Note moyenne : ⭐ {profile.moyenneNote} / 5
+  </p>
+)}
+
           <button type="submit" style={styles.button}>Enregistrer</button>
         </form>
 
