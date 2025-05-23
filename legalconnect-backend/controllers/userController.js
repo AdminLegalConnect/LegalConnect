@@ -72,9 +72,10 @@ const ajouterNote = async (req, res) => {
       return res.status(404).json({ message: "Avocat introuvable." });
     }
 
-    // Empêche les doublons : 1 note par utilisateur et par plainte
     const dejaNote = avocat.notes?.some(
-      (n) => n.utilisateur?.toString() === utilisateurId && n.plainte?.toString() === plainteId
+      (n) =>
+        n.auteurId?.toString() === utilisateurId &&
+        n.plainte?.toString() === plainteId
     );
 
     if (dejaNote) {
@@ -82,10 +83,10 @@ const ajouterNote = async (req, res) => {
     }
 
     avocat.notes.push({
-      utilisateur: utilisateurId,
-      plainte: plainteId,
-      note,
+      auteurId: utilisateurId,
+      valeur: note,
       commentaire,
+      plainte: plainteId,
     });
 
     await avocat.save();
@@ -95,6 +96,7 @@ const ajouterNote = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur lors de l'ajout de la note." });
   }
 };
+
 
 
 // 💬 POST /api/profil/commentaire

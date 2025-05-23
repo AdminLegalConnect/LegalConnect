@@ -9,12 +9,14 @@ const userSchema = new mongoose.Schema({
   specialite: { type: String },
   telephone: { type: String },
   ville: { type: String },
-  siteInternet: { type: String }, // <= NOUVEAU
-  photo: { type: String }, // Chemin relatif vers l'image
+  siteInternet: { type: String },
+  photo: { type: String },
   notes: [
     {
       auteurId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       valeur: { type: Number, min: 1, max: 5 },
+      commentaire: { type: String }, // ajouté
+      plainte: { type: mongoose.Schema.Types.ObjectId, ref: "Complaint" }, // ajouté
       date: { type: Date, default: Date.now }
     }
   ],
@@ -26,9 +28,8 @@ const userSchema = new mongoose.Schema({
       date: { type: Date, default: Date.now }
     }
   ],
-  avis: [{ type: mongoose.Schema.Types.ObjectId, ref: "Avis" }], // <= Nouveau champ pour lier les avis
+  avis: [{ type: mongoose.Schema.Types.ObjectId, ref: "Avis" }],
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;
