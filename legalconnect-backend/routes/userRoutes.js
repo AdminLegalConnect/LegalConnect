@@ -9,6 +9,7 @@ const {
   ajouterNote,
   deleteAccount,
   ajouterCommentaire,
+  rechercherJuridiques,
   uploadProfilePhoto
 } = require("../controllers/userController");
 
@@ -18,6 +19,8 @@ router.put("/profil/motdepasse", authMiddleware, changePassword);
 router.post("/profil/note", authMiddleware, ajouterNote);
 router.delete("/profil", authMiddleware, deleteAccount);
 router.post("/profil/commentaire", authMiddleware, ajouterCommentaire);
+router.get("/juridiques/recherche", authMiddleware, rechercherJuridiques);
+
 
 // ✅ Route propre pour uploader la photo
 router.put("/profil/photo", authMiddleware, upload.single("photo"), uploadProfilePhoto);

@@ -29,6 +29,21 @@ const PlainteDetail = () => {
   const [emailInvite, setEmailInvite] = useState("");
   const [paiements, setPaiements] = useState([]);
   const [montantsLibres, setMontantsLibres] = useState({});
+  const [query, setQuery] = useState("");
+const [resultatsRecherche, setResultatsRecherche] = useState([]);
+
+const rechercherJuridiques = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`http://localhost:5000/api/juridiques/recherche?q=${query}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setResultatsRecherche(res.data);
+  } catch (err) {
+    console.error("Erreur recherche juridiques", err);
+    setError("Erreur lors de la recherche de juridiques.");
+  }
+};
 
 
   const fetchComplaint = async () => {
@@ -239,6 +254,25 @@ const PlainteDetail = () => {
     }
   };
 
+  const inviterJuridique = async (juridiqueId) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post(`http://localhost:5000/api/complaints/${id}/inviter`, { juridiqueId }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    alert("Juridique invité !");
+    fetchComplaint();
+  } catch (err) {
+    console.error("Erreur lors de l'invitation :", err);
+    alert("Erreur lors de l'invitation.");
+  }
+};
+
+const envoyerMessage = (email) => {
+  window.location.href = `mailto:${email}`;
+};
+
+
 console.log("Contenu de user depuis le context :", user)
 
   if (!complaint) return <p style={{ padding: "2rem" }}>Chargement...</p>;
@@ -377,6 +411,24 @@ const isCreator = user && complaint.utilisateur && String(user.id) === String(co
 
         {activeTab === "settings" && user && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+           <div>
+  <h4>🔍 Rechercher un juridique :</h4>
+  <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Nom, spécialité..." />
+  <button onClick={rechercherJuridiques}>Rechercher</button>
+
+  <ul>
+    {resultatsRecherche.map(j => (
+      <li key={j._id} style={{ marginBottom: "1rem" }}>
+        <strong>{j.prenom} {j.nom}</strong> – {j.specialite} <br />
+        Note : {j.moyenneNote ? `⭐ ${j.moyenneNote}/5` : "Non noté"}
+        <br />
+        <button onClick={() => inviterJuridique(j._id)}>Inviter à cette plainte</button>
+        <button onClick={() => envoyerMessage(j.email)}>Envoyer un message</button>
+      </li>
+    ))}
+  </ul>
+</div>
+
             <div>
               <label>Inviter un participant :</label><br />
               <input type="email" placeholder="Email" value={emailInvite} onChange={(e) => setEmailInvite(e.target.value)} style={styles.input} />

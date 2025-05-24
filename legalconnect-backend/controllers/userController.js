@@ -161,6 +161,39 @@ const uploadProfilePhoto = async (req, res) => {
   }
 };
 
+const rechercherJuridiques = async (req, res) => {
+  try {
+    const query = req.query.q?.toLowerCase() || "";
+    const juridiques = await User.find({
+      role: "juridique",
+      $or: [
+        { prenom: { $regex: query, $options: "i" } },
+        { nom: { $regex: query, $options: "i" } },
+        { specialite: { $regex: query, $options: "i" } },
+      ],
+    }).select("prenom nom email specialite notes");
+
+    const juridiquesAvecNote = juridiques.map(j => {
+      const total = j.notes?.reduce((sum, n) => sum + (n.valeur || 0), 0);
+      const moyenne = j.notes?.length ? (total / j.notes.length).toFixed(2) : null;
+      return {
+        _id: j._id,
+        prenom: j.prenom,
+        nom: j.nom,
+        email: j.email,
+        specialite: j.specialite,
+        moyenneNote: moyenne,
+      };
+    });
+
+    res.status(200).json(juridiquesAvecNote);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de la recherche", error: err.message });
+  }
+};
+
+
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -168,5 +201,6 @@ module.exports = {
   ajouterNote,
   deleteAccount,
   ajouterCommentaire,
-  uploadProfilePhoto, // 👈 assure-toi de l'exporter ici
+  uploadProfilePhoto,
+  rechercherJuridiques, // 👈 assure-toi de l'exporter ici
 };
