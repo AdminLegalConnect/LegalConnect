@@ -20,6 +20,7 @@ import AvisDetailJuridique from "./pages/AvisDetailJuridique";
 import FacturationJuridique from "./pages/FacturationJuridique";
 import ChercherPlainte from "./pages/ChercherPlainte";
 import PlainteDetailJuridique from "./pages/PlainteDetailJuridique";
+import Juridiques from "./components/Juridiques";
 
 function App() {
   const { user } = useContext(AuthContext); // ✅
@@ -50,6 +51,7 @@ function App() {
         <Route path="/facturation" element={<FacturationJuridique />} />
         <Route path="/recherche-plainte" element={<ChercherPlainte />} />
         <Route path="/plainte-juridique/:id" element={<PlainteDetailJuridique />} />
+        <Route path="/juridiques" element={<Juridiques />} />
       </Route>
     </Routes>
   );

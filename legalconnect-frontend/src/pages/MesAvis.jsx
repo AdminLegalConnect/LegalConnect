@@ -44,18 +44,19 @@ const MesAvis = () => {
         </div>
 
         <h2 style={styles.heading}>
-  {user.role === "juridique" ? "Avis suivis" : "Mes avis"}
+  {user?.role === "juridique" ? "Avis suivis" : "Mes avis"}
 </h2>
+
 
         {error && <p style={styles.error}>{error}</p>}
         {avisList.length === 0 ? (
-          <p style={styles.info}>
-  {user.role === "juridique"
-    ? "Vous ne suivez encore aucun avis."
-    : "Vous n’avez encore déposé aucun avis."}
-</p>
+  <p style={styles.info}>
+    {user?.role === "juridique"
+      ? "Vous ne suivez encore aucun avis."
+      : "Vous n’avez encore déposé aucun avis."}
+  </p>
+) : (
 
-        ) : (
           <ul style={styles.list}>
             {avisList.map((avis) => (
               <li key={avis._id} style={styles.item}>
