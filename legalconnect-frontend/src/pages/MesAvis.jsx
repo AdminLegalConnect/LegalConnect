@@ -51,10 +51,11 @@ const MesAvis = () => {
         {error && <p style={styles.error}>{error}</p>}
         {avisList.length === 0 ? (
   <p style={styles.info}>
-    {user?.role === "juridique"
-      ? "Vous ne suivez encore aucun avis."
-      : "Vous n’avez encore déposé aucun avis."}
-  </p>
+  {user?.role === "juridique"
+    ? "Vous ne suivez encore aucun avis."
+    : "Vous n’avez encore déposé aucun avis."}
+</p>
+
 ) : (
 
           <ul style={styles.list}>
@@ -92,8 +93,9 @@ const MesAvis = () => {
                 </p>
                 <button
                   onClick={() =>
-  navigate(user.role === "juridique" ? `/juridique/avis/${avis._id}` : `/mes-avis/${avis._id}`)
+  navigate(user?.role === "juridique" ? `/juridique/avis/${avis._id}` : `/mes-avis/${avis._id}`)
 }
+
 
                   style={styles.button}
                 >
