@@ -31,7 +31,7 @@ const NouvelleDiscussion = () => {
         { destinataireId: selectedId, texte: message },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      navigate(`/messagerie/chat/${selectedId}`);
+      navigate(`/messagerie/${selectedId}`);
     } catch (err) {
       console.error("Erreur envoi message initial", err);
     }
