@@ -21,6 +21,11 @@ import FacturationJuridique from "./pages/FacturationJuridique";
 import ChercherPlainte from "./pages/ChercherPlainte";
 import PlainteDetailJuridique from "./pages/PlainteDetailJuridique";
 import Juridiques from "./components/Juridiques";
+import Messagerie from "./components/Chat/Messagerie";
+import NouvelleDiscussion from "./components/Chat/NouvelleDiscussion";
+import ChatConversation from "./components/Chat/chatConversation";
+
+
 
 function App() {
   const { user } = useContext(AuthContext); // ✅
@@ -52,6 +57,11 @@ function App() {
         <Route path="/recherche-plainte" element={<ChercherPlainte />} />
         <Route path="/plainte-juridique/:id" element={<PlainteDetailJuridique />} />
         <Route path="/juridiques" element={<Juridiques />} />
+        <Route path="/messagerie" element={<Messagerie />} />
+        <Route path="/messagerie/nouveau" element={<NouvelleDiscussion />} />
+        <Route path="/messagerie/:destinataireId" element={<ChatConversation />} />
+
+       
       </Route>
     </Routes>
   );

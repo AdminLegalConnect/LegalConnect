@@ -12,6 +12,8 @@ const homeRoutes = require("./routes/homeRoutes"); // Ajout des routes pour l'ac
 const avisRoutes = require("./routes/avisRoutes"); // Routes pour les avis
 const forumRoutes = require("./routes/forumRoutes");
 const etapeJuridiqueRoutes = require("./routes/etapeJuridiqueRoutes");
+const messageRoutes = require("./routes/messageRoute");
+
 
 
 
@@ -32,6 +34,7 @@ app.use("/api", homeRoutes);      // Routes d'accueil
 app.use("/api", avisRoutes);      // Routes pour les avis
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", forumRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 // Connexion MongoDB

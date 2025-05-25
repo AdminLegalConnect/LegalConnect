@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Juridiques = () => {
   const [query, setQuery] = useState("");
@@ -7,6 +8,12 @@ const Juridiques = () => {
   const [mesDossiers, setMesDossiers] = useState([]);
   const [selectedDossier, setSelectedDossier] = useState("");
   const [selectedJurId, setSelectedJurId] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleMessageClick = (id) => {
+    navigate(`/messagerie?dest=${id}`);
+  };
 
   const rechercher = async () => {
     try {
@@ -94,7 +101,10 @@ const Juridiques = () => {
               <p><strong>Email :</strong> {j.email}</p>
               <p><strong>Note moyenne :</strong> {j.moyenneNote ? `⭐ ${j.moyenneNote}/5` : "Non noté"}</p>
 
-              <button onClick={() => alert("Fonction de messagerie en cours de développement")} style={{ marginRight: "1rem" }}>
+              <button
+                onClick={() => handleMessageClick(j._id)}
+                style={{ marginRight: "1rem", padding: "0.4rem 1rem", backgroundColor: "#1976d2", color: "white", border: "none", borderRadius: "5px" }}
+              >
                 Envoyer un message
               </button>
 

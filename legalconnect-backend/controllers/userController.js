@@ -191,6 +191,62 @@ const rechercherJuridiques = async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la recherche", error: err.message });
   }
 };
+// Récupérer les messages reçus
+const getMessages = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate("messagesRecus.expediteur", "prenom nom email")
+      .lean();
+
+    res.status(200).json(user.messagesRecus.reverse());
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+// Envoyer un message avec (optionnellement) un fichier
+const envoyerMessage = async (req, res) => {
+  try {
+    const { destinataireId, texte } = req.body;
+    const expediteurId = req.user.id;
+
+    const fichier = req.file
+      ? {
+          nom: req.file.originalname,
+          type: req.file.mimetype,
+          url: `/uploads/${req.file.filename}`
+        }
+      : null;
+
+    const destinataire = await User.findById(destinataireId);
+    if (!destinataire) {
+      return res.status(404).json({ error: "Destinataire introuvable" });
+    }
+
+    destinataire.messagesRecus.push({
+      expediteur: expediteurId,
+      texte,
+      fichier,
+      lu: false
+    });
+
+    await destinataire.save();
+    res.status(200).json({ message: "Message envoyé avec succès" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, "_id prenom nom email");
+    res.json(users);
+  } catch (error) {
+    console.error("Erreur récupération utilisateurs", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
 
 
 
@@ -202,5 +258,9 @@ module.exports = {
   deleteAccount,
   ajouterCommentaire,
   uploadProfilePhoto,
-  rechercherJuridiques, // 👈 assure-toi de l'exporter ici
+  rechercherJuridiques,
+  getMessages,
+  getAllUsers,
+  envoyerMessage,
+   // 👈 assure-toi de l'exporter ici
 };

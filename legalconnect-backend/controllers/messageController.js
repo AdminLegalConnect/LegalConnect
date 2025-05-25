@@ -1,0 +1,93 @@
+const Message = require("../models/message");
+const User = require("../models/user");
+
+const getMessagesWithUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const destinataireId = req.params.destinataireId;
+
+    const messages = await Message.find({
+      $or: [
+        { expediteur: userId, destinataire: destinataireId },
+        { expediteur: destinataireId, destinataire: userId },
+      ],
+    }).sort("createdAt");
+
+    const formatted = messages.map((msg) => ({
+      _id: msg._id,
+      texte: msg.texte,
+      estExpediteur: msg.expediteur.toString() === userId,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Erreur getMessagesWithUser", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+const sendMessage = async (req, res) => {
+  try {
+    const { destinataireId, texte } = req.body;
+    const nouveauMessage = new Message({
+      expediteur: req.user.id,
+      destinataire: destinataireId,
+      texte,
+    });
+    const saved = await nouveauMessage.save();
+    res.json({
+      _id: saved._id,
+      texte: saved.texte,
+      estExpediteur: true,
+    });
+  } catch (err) {
+    console.error("Erreur sendMessage", err);
+    res.status(500).json({ message: "Erreur envoi message" });
+  }
+};
+
+const getConversations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const messages = await Message.find({
+      $or: [{ expediteur: userId }, { destinataire: userId }],
+    })
+      .sort("-createdAt")
+      .populate("expediteur", "prenom nom email")
+      .populate("destinataire", "prenom nom email");
+
+    const seen = new Set();
+    const conversations = [];
+
+    for (let msg of messages) {
+      const other =
+        msg.expediteur._id.toString() === userId
+          ? msg.destinataire
+          : msg.expediteur;
+
+      if (!seen.has(other._id.toString())) {
+        seen.add(other._id.toString());
+        conversations.push({
+          user: {
+            _id: other._id,
+            prenom: other.prenom,
+            nom: other.nom,
+            email: other.email,
+          },
+          lastMessage: msg.texte,
+        });
+      }
+    }
+
+    res.json(conversations);
+  } catch (err) {
+    console.error("Erreur getConversations", err);
+    res.status(500).json({ message: "Erreur récupération discussions" });
+  }
+};
+
+module.exports = {
+  getMessagesWithUser,
+  sendMessage,
+  getConversations,
+};

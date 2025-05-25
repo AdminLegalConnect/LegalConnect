@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/multerMiddleware");
+
 const {
   getProfile,
   updateProfile,
@@ -10,7 +11,10 @@ const {
   deleteAccount,
   ajouterCommentaire,
   rechercherJuridiques,
-  uploadProfilePhoto
+  uploadProfilePhoto,
+  getMessages,
+  getAllUsers,
+  envoyerMessage
 } = require("../controllers/userController");
 
 router.get("/profil", authMiddleware, getProfile);
@@ -20,9 +24,13 @@ router.post("/profil/note", authMiddleware, ajouterNote);
 router.delete("/profil", authMiddleware, deleteAccount);
 router.post("/profil/commentaire", authMiddleware, ajouterCommentaire);
 router.get("/juridiques/recherche", authMiddleware, rechercherJuridiques);
-
-
-// ✅ Route propre pour uploader la photo
 router.put("/profil/photo", authMiddleware, upload.single("photo"), uploadProfilePhoto);
+router.get("/users/all", authMiddleware, getAllUsers);
+
+
+
+// ✅ Messagerie
+router.get("/messagerie", authMiddleware, getMessages);
+router.post("/messagerie/envoyer", authMiddleware, upload.single("fichier"), envoyerMessage);
 
 module.exports = router;

@@ -16,16 +16,15 @@ const authMiddleware = async (req, res, next) => {
     const userId = decoded.id || decoded._id; // 👈 on couvre les 2 cas
     const user = await User.findById(userId);
 
-    req.user = {
-  ...user.toObject(), // on récupère toutes les infos
-  id: user._id.toString(), // 👈 important : assure que `.id` existe
+  if (!user) {
+  return res.status(401).json({ error: "Utilisateur non trouvé." });
+}
+
+req.user = {
+  ...user.toObject(),
+  id: user._id.toString(),
 };
 
-    if (!user) {
-      return res.status(401).json({ error: "Utilisateur non trouvé." });
-    }
-
-    req.user = user; // Injection de l'utilisateur complet
     next();
   } catch (err) {
     res.status(401).json({ error: "Token invalide." });

@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer} onClick={() => navigate("/dashboard")}> 
+      <div style={styles.logoContainer} onClick={() => navigate("/dashboard")}>
         <img src={logo} alt="LegalConnect" style={styles.logo} />
         <span style={styles.logoText}>LegalConnect</span>
       </div>
@@ -27,8 +27,12 @@ const Header = () => {
             <Link to="/dashboard" style={styles.link}>Dashboard</Link>
             <Link to="/mes-plaintes" style={styles.link}>Mes dossiers</Link>
             <Link to="/mes-avis" style={styles.link}>Mes avis</Link>
-            <Link to="/profil" style={styles.link}>Mon profil</Link>
             <Link to="/juridiques" style={styles.link}>Juridiques</Link>
+            <Link to="/messagerie" style={styles.link}>
+              Messagerie
+              {user?.hasNewMessages && <span style={styles.badge}>•</span>}
+            </Link>
+            <Link to="/profil" style={styles.link}>Mon profil</Link>
           </>
         )}
         <button onClick={handleLogout} style={styles.logoutButton}>Déconnexion</button>
@@ -49,6 +53,7 @@ const styles = {
     position: "sticky",
     top: 0,
     zIndex: 1000,
+    flexWrap: "wrap",
   },
   logoContainer: {
     display: "flex",
@@ -88,6 +93,14 @@ const styles = {
     cursor: "pointer",
     fontWeight: "bold",
     transition: "background-color 0.2s",
+  },
+  badge: {
+    marginLeft: "0.3rem",
+    backgroundColor: "#ef4444",
+    borderRadius: "50%",
+    width: "10px",
+    height: "10px",
+    display: "inline-block",
   },
 };
 

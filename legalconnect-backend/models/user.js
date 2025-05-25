@@ -11,6 +11,20 @@ const userSchema = new mongoose.Schema({
   ville: { type: String },
   siteInternet: { type: String },
   photo: { type: String },
+  messagesRecus: [
+  {
+    expediteur: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    texte: { type: String },
+    fichier: {
+      nom: String,
+      type: String,
+      url: String,
+    },
+    lu: { type: Boolean, default: false },
+    date: { type: Date, default: Date.now }
+  }
+],
+
   notes: [
     {
       auteurId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
