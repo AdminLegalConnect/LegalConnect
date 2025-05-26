@@ -11,12 +11,17 @@ const getMessagesWithUser = async (req, res) => {
         { expediteur: userId, destinataire: destinataireId },
         { expediteur: destinataireId, destinataire: userId },
       ],
-    }).sort("createdAt");
+    })
+      .sort("createdAt")
+      .populate("expediteur", "prenom nom email"); // 👈 on enrichit ici
 
     const formatted = messages.map((msg) => ({
       _id: msg._id,
       texte: msg.texte,
-      estExpediteur: msg.expediteur.toString() === userId,
+      estExpediteur: msg.expediteur._id.toString() === userId,
+      createdAt: msg.createdAt,
+      expediteurNom: `${msg.expediteur.prenom} ${msg.expediteur.nom}`,
+      expediteurEmail: msg.expediteur.email,
     }));
 
     res.json(formatted);
@@ -39,6 +44,7 @@ const sendMessage = async (req, res) => {
       _id: saved._id,
       texte: saved.texte,
       estExpediteur: true,
+      createdAt: saved.createdAt,
     });
   } catch (err) {
     console.error("Erreur sendMessage", err);

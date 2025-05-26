@@ -1,4 +1,3 @@
-// Legalconnect-frontend/src/components/Chat/ChatConversation.jsx
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -47,38 +46,107 @@ const ChatConversation = () => {
   }, [messages]);
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Discussion</h2>
-      <div className="border rounded p-4 h-96 overflow-y-scroll bg-gray-50">
+    <div style={styles.container}>
+      <h2 style={styles.header}>💬 Discussion</h2>
+      <div style={styles.messagesBox}>
         {messages.map((m) => (
           <div
             key={m._id}
-            className={`mb-2 max-w-xs p-2 rounded-lg text-sm ${
-              m.estExpediteur ? "bg-blue-200 ml-auto" : "bg-gray-200"
-            }`}
+            style={{
+              ...styles.messageBubble,
+              alignSelf: m.estExpediteur ? "flex-end" : "flex-start",
+              backgroundColor: m.estExpediteur ? "#dbeafe" : "#e5e7eb",
+            }}
           >
-            {m.texte}
+            <div style={styles.messageText}>{m.texte}</div>
+            <div style={styles.metaInfo}>
+              <span>{m.expediteurNom || m.expediteurEmail || "Utilisateur"}</span>
+              <span>
+                {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR") : ""}
+              </span>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSend} className="mt-4 flex">
+      <form onSubmit={handleSend} style={styles.form}>
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Écrire un message..."
-          className="flex-grow border rounded-l p-2"
+          style={styles.input}
         />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 rounded-r"
-        >
+        <button type="submit" style={styles.button}>
           Envoyer
         </button>
       </form>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    maxWidth: "600px",
+    margin: "2rem auto",
+    padding: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  header: {
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+  },
+  messagesBox: {
+    flex: 1,
+    minHeight: "60vh",
+    maxHeight: "60vh",
+    overflowY: "auto",
+    padding: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    backgroundColor: "#f9fafb",
+  },
+  messageBubble: {
+    padding: "0.75rem 1rem",
+    borderRadius: "16px",
+    maxWidth: "70%",
+    position: "relative",
+    fontSize: "0.95rem",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  },
+  messageText: {
+    marginBottom: "0.25rem",
+  },
+  metaInfo: {
+    fontSize: "0.7rem",
+    color: "#6b7280",
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  form: {
+    display: "flex",
+    gap: "0.5rem",
+  },
+  input: {
+    flex: 1,
+    padding: "0.6rem 1rem",
+    borderRadius: "999px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+  },
+  button: {
+    padding: "0.6rem 1rem",
+    backgroundColor: "#2563eb",
+    color: "white",
+    border: "none",
+    borderRadius: "999px",
+    cursor: "pointer",
+  },
 };
 
 export default ChatConversation;
