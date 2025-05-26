@@ -23,6 +23,14 @@ const getMessagesWithUser = async (req, res) => {
       expediteurNom: `${msg.expediteur.prenom} ${msg.expediteur.nom}`,
       expediteurEmail: msg.expediteur.email,
     }));
+await Message.updateMany(
+  {
+    expediteur: destinataireId,
+    destinataire: userId,
+    lu: false,
+  },
+  { $set: { lu: true } }
+);
 
     res.json(formatted);
   } catch (err) {
@@ -66,24 +74,34 @@ const getConversations = async (req, res) => {
     const conversations = [];
 
     for (let msg of messages) {
-      const other =
-        msg.expediteur._id.toString() === userId
-          ? msg.destinataire
-          : msg.expediteur;
+  const other =
+    msg.expediteur._id.toString() === userId
+      ? msg.destinataire
+      : msg.expediteur;
 
-      if (!seen.has(other._id.toString())) {
-        seen.add(other._id.toString());
-        conversations.push({
-          user: {
-            _id: other._id,
-            prenom: other.prenom,
-            nom: other.nom,
-            email: other.email,
-          },
-          lastMessage: msg.texte,
-        });
-      }
-    }
+  if (!seen.has(other._id.toString())) {
+    seen.add(other._id.toString());
+
+    // ➕ Compter les messages non lus de cet utilisateur
+    const nonLus = await Message.countDocuments({
+      expediteur: other._id,
+      destinataire: userId,
+      lu: false,
+    });
+
+    conversations.push({
+      user: {
+        _id: other._id,
+        prenom: other.prenom,
+        nom: other.nom,
+        email: other.email,
+      },
+      lastMessage: msg.texte,
+      nonLus, // 👈 renvoyé au front
+    });
+  }
+}
+
 
     res.json(conversations);
   } catch (err) {
