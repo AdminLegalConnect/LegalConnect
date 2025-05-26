@@ -48,38 +48,49 @@ const ChatConversation = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>💬 Discussion</h2>
-      <div style={styles.messagesBox}>
-        {messages.map((m) => (
-          <div
-            key={m._id}
-            style={{
-              ...styles.messageBubble,
-              alignSelf: m.estExpediteur ? "flex-end" : "flex-start",
-              backgroundColor: m.estExpediteur ? "#dbeafe" : "#e5e7eb",
-            }}
-          >
-            <div style={styles.messageText}>{m.texte}</div>
-            <div style={styles.metaInfo}>
-              <span>{m.expediteurNom || m.expediteurEmail || "Utilisateur"}</span>
-              <span>
+      <div style={styles.chatMessages}>
+        {messages.map((m) => {
+          const isMe = m.estExpediteur;
+          const role = m.expediteurRole || "particulier"; // facultatif si tu veux l’ajouter
+          const couleur = isMe ? "#dbeafe" : role === "juridique" ? "#fef9c3" : "#e5e7eb";
+
+          return (
+            <div
+              key={m._id}
+              style={{
+                alignSelf: isMe ? "flex-end" : "flex-start",
+                backgroundColor: couleur,
+                color: "#111827",
+                borderRadius: "12px",
+                padding: "0.8rem",
+                maxWidth: "75%",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                marginBottom: "1rem",
+              }}
+            >
+              <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
+                {role === "juridique" ? "🧑‍⚖️ " : "🙋 "}
+                {m.expediteurNom || m.expediteurEmail}
+                {role ? ` - ${role}` : ""}
+              </div>
+              <div>{m.texte}</div>
+              <div style={{ fontSize: "0.75rem", marginTop: "0.5rem", color: "#6b7280" }}>
                 {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR") : ""}
-              </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSend} style={styles.form}>
-        <input
-          type="text"
+      <form onSubmit={handleSend} style={styles.chatInputBox}>
+        <textarea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          rows={2}
           placeholder="Écrire un message..."
-          style={styles.input}
+          style={styles.chatTextarea}
         />
-        <button type="submit" style={styles.button}>
-          Envoyer
-        </button>
+        <button type="submit" style={styles.chatSendButton}>Envoyer</button>
       </form>
     </div>
   );
@@ -87,7 +98,7 @@ const ChatConversation = () => {
 
 const styles = {
   container: {
-    maxWidth: "600px",
+    maxWidth: "700px",
     margin: "2rem auto",
     padding: "1rem",
     display: "flex",
@@ -98,7 +109,7 @@ const styles = {
     fontSize: "1.5rem",
     fontWeight: "bold",
   },
-  messagesBox: {
+  chatMessages: {
     flex: 1,
     minHeight: "60vh",
     maxHeight: "60vh",
@@ -106,45 +117,29 @@ const styles = {
     padding: "1rem",
     display: "flex",
     flexDirection: "column",
-    gap: "0.5rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    backgroundColor: "#f9fafb",
   },
-  messageBubble: {
-    padding: "0.75rem 1rem",
-    borderRadius: "16px",
-    maxWidth: "70%",
-    position: "relative",
-    fontSize: "0.95rem",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-  },
-  messageText: {
-    marginBottom: "0.25rem",
-  },
-  metaInfo: {
-    fontSize: "0.7rem",
-    color: "#6b7280",
+  chatInputBox: {
     display: "flex",
-    justifyContent: "space-between",
-  },
-  form: {
-    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
     gap: "0.5rem",
+    borderTop: "1px solid #e5e7eb",
+    paddingTop: "1rem",
   },
-  input: {
+  chatTextarea: {
     flex: 1,
-    padding: "0.6rem 1rem",
-    borderRadius: "999px",
+    padding: "0.6rem",
+    borderRadius: "12px",
     border: "1px solid #ccc",
+    resize: "none",
     fontSize: "1rem",
   },
-  button: {
-    padding: "0.6rem 1rem",
-    backgroundColor: "#2563eb",
+  chatSendButton: {
+    backgroundColor: "#2563EB",
     color: "white",
     border: "none",
-    borderRadius: "999px",
+    padding: "0.6rem 1rem",
+    borderRadius: "8px",
     cursor: "pointer",
   },
 };
