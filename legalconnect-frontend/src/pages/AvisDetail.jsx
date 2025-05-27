@@ -345,11 +345,21 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
               marginBottom: "1rem",
             }}
           >
-            <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
-              {auteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
-              {auteur?.prenom?.trim() ? auteur.prenom : auteur?.email}
-              {auteur?.role ? ` - ${auteur.role}` : ""}
-            </div>
+            <div
+  style={{
+    fontSize: "0.85rem",
+    fontWeight: "bold",
+    marginBottom: "0.3rem",
+    cursor: "pointer",
+    textDecoration: "underline",
+  }}
+  onClick={() => navigate(`/profil/${auteur._id}`)}
+>
+  {auteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "}
+  {auteur?.prenom?.trim() ? auteur.prenom : auteur?.email}
+  {auteur?.role ? ` - ${auteur.role}` : ""}
+</div>
+
             <div>{msg.texte}</div>
             <div style={{ fontSize: "0.75rem", marginTop: "0.5rem", color: "#6b7280" }}>
               {new Date(msg.date).toLocaleString("fr-FR")}
@@ -475,7 +485,13 @@ const isCreator = user && avis.utilisateur && (user._id === avis.utilisateur._id
                 <ul>
   {avis.participants.map((p, index) => (
     <li key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-      <span>{p.prenom || p.email}</span>
+      <span
+  style={{ textDecoration: "underline", cursor: "pointer" }}
+  onClick={() => navigate(`/profil/${p._id}`)}
+>
+  {p.prenom || p.email}
+</span>
+
       {user && avis.utilisateur && (user.id || user._id)?.toString() === avis.utilisateur._id?.toString()
  && (
         <button

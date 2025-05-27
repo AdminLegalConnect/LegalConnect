@@ -24,6 +24,7 @@ import Juridiques from "./components/Juridiques";
 import Messagerie from "./components/Chat/Messagerie";
 import NouvelleDiscussion from "./components/Chat/NouvelleDiscussion";
 import ChatConversation from "./components/Chat/chatConversation";
+import ProfilLectureSeule from "./pages/ProfilLectureSeule";
 
 
 
@@ -60,6 +61,7 @@ function App() {
         <Route path="/messagerie" element={<Messagerie />} />
         <Route path="/messagerie/nouveau" element={<NouvelleDiscussion />} />
         <Route path="/messagerie/:destinataireId" element={<ChatConversation />} />
+        <Route path="/profil/:id" element={<ProfilLectureSeule />} />
 
        
       </Route>

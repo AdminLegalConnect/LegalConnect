@@ -14,6 +14,7 @@ const {
   uploadProfilePhoto,
   getMessages,
   getAllUsers,
+  getUserPublicProfile,
   envoyerMessage
 } = require("../controllers/userController");
 
@@ -26,6 +27,7 @@ router.post("/profil/commentaire", authMiddleware, ajouterCommentaire);
 router.get("/juridiques/recherche", authMiddleware, rechercherJuridiques);
 router.put("/profil/photo", authMiddleware, upload.single("photo"), uploadProfilePhoto);
 router.get("/users/all", authMiddleware, getAllUsers);
+router.get("/users/:id", getUserPublicProfile);
 
 
 

@@ -247,6 +247,30 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// ✅ Lecture seule d’un profil par ID
+const getUserPublicProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId)
+      .select("-password")
+      .populate("avis", "titre");
+
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+    // Calcul note moyenne pour les juridiques
+    let moyenneNote = null;
+    if (user.role === "juridique" && user.notes?.length) {
+      const total = user.notes.reduce((sum, n) => sum + (n.valeur || 0), 0);
+      moyenneNote = (total / user.notes.length).toFixed(2);
+    }
+
+    res.status(200).json({ profil: { ...user.toObject(), moyenneNote } });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+};
+
+
 
 
 
@@ -263,5 +287,6 @@ module.exports = {
   getMessages,
   getAllUsers,
   envoyerMessage,
+  getUserPublicProfile,
    // 👈 assure-toi de l'exporter ici
 };
