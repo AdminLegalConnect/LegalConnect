@@ -68,6 +68,26 @@ const rechercherJuridiques = async () => {
 
   useEffect(() => { fetchComplaint(); }, [id]);
 
+  const [avocatsDejaNotes, setAvocatsDejaNotes] = useState([]);
+
+useEffect(() => {
+  if (!user || !complaint) return;
+
+  const notesExistantes = complaint.participants
+    ?.filter(p => p.role === "juridique")
+    .filter(avocat => {
+      return avocat.notes?.some(
+        note =>
+          note.auteurId?.toString() === (user._id || user.id) &&
+          note.plainte?.toString() === complaint._id
+      );
+    })
+    .map(av => av._id);
+
+  setAvocatsDejaNotes(notesExistantes);
+}, [complaint, user]);
+
+
   useEffect(() => {
   const fetchPaiements = async () => {
   const token = localStorage.getItem("token");
@@ -254,10 +274,13 @@ const rechercherJuridiques = async () => {
     }
   };
 
-  const inviterJuridique = async (juridiqueId) => {
+
+const inviterJuridique = async (juridique) => {
   try {
     const token = localStorage.getItem("token");
-    await axios.post(`http://localhost:5000/api/complaints/${id}/inviter`, { juridiqueId }, {
+    await axios.post(`http://localhost:5000/api/complaints/${id}/inviter`, {
+      email: juridique.email,
+    }, {
       headers: { Authorization: `Bearer ${token}` },
     });
     alert("Juridique invité !");
@@ -267,6 +290,7 @@ const rechercherJuridiques = async () => {
     alert("Erreur lors de l'invitation.");
   }
 };
+
 
 const envoyerMessage = (email) => {
   window.location.href = `mailto:${email}`;
@@ -422,7 +446,7 @@ const isCreator = user && complaint.utilisateur && String(user.id) === String(co
         <strong>{j.prenom} {j.nom}</strong> – {j.specialite} <br />
         Note : {j.moyenneNote ? `⭐ ${j.moyenneNote}/5` : "Non noté"}
         <br />
-        <button onClick={() => inviterJuridique(j._id)}>Inviter à cette plainte</button>
+        <button onClick={() => inviterJuridique(j)}>Inviter à cette plainte</button>
         <button onClick={() => envoyerMessage(j.email)}>Envoyer un message</button>
       </li>
     ))}
@@ -658,25 +682,26 @@ const nomAffiche =
   </div>
 )}
 
-{complaint?.statut === "résolue" && user?.role === "particulier" && (
-  <div style={{ marginTop: "2rem" }}>
-    <h3>Vous pouvez maintenant évaluer le traitement de cette plainte :</h3>
-    {complaint.participants
-      ?.filter((p) => p.role === "juridique")
-      .map((avocat) => (
-        <div key={avocat._id} style={{ marginBottom: "1.5rem" }}>
-          <p><strong>Avocat :</strong> {avocat.prenom || avocat.email}</p>
-          <NotationJuridique
-  avocatId={avocat._id}
-  avocatNom={avocat.prenom || avocat.email}
-  plainteId={complaint._id}
-  onSubmitSuccess={() => alert("Note envoyée !")}
-/>
+{complaint.statut === "résolue" &&
+  complaint.participants
+    ?.filter((p) => p.role === "juridique")
+    .filter((avocat) => !avocatsDejaNotes.includes(avocat._id))
+    .map((avocat) => (
+      <div key={avocat._id} style={{ marginBottom: "1.5rem" }}>
+        <p><strong>Avocat :</strong> {avocat.prenom || avocat.email}</p>
+        <NotationJuridique
+          avocatId={avocat._id}
+          avocatNom={avocat.prenom || avocat.email}
+          plainteId={complaint._id}
+          onSubmitSuccess={() => {
+            alert("Note envoyée !");
+            setAvocatsDejaNotes((prev) => [...prev, avocat._id]);
+          }}
+        />
+      </div>
+))}
 
-        </div>
-      ))}
-  </div>
-)}
+
 
 
 
