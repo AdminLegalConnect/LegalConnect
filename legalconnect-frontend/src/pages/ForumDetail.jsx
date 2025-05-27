@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../services/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 function ForumDetail() {
   const { id } = useParams();
@@ -11,6 +13,8 @@ function ForumDetail() {
   const [commentContent, setCommentContent] = useState("");
   const [commentFile, setCommentFile] = useState(null);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     fetchPost();
@@ -97,7 +101,15 @@ function ForumDetail() {
     <div className="p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-2">{post.titre}</h2>
       <p className="text-sm text-gray-500 mb-4">
-        Publié par {post.auteur?.prenom || post.auteur?.email} le{" "}
+        Publié par{" "}
+<span
+  onClick={() => navigate(`/profil/${post.auteur?._id}`)}
+  style={{ color: "#2563EB", cursor: "pointer", textDecoration: "underline" }}
+>
+  {post.auteur?.prenom || post.auteur?.email}
+</span>{" "}
+le{" "}
+
         {new Date(post.dateCreation).toLocaleDateString("fr-FR")}
       </p>
       <p className="mb-6 whitespace-pre-line">{post.contenu}</p>
@@ -128,9 +140,15 @@ function ForumDetail() {
           post.commentaires.map((comment) => (
             <div key={comment._id} className="border p-3 rounded mb-3">
               <p className="text-sm font-semibold mb-1">
-                {comment.auteur?.prenom || comment.auteur?.email} le{" "}
-                {new Date(comment.dateCreation).toLocaleString("fr-FR")}
-              </p>
+  <span
+    onClick={() => navigate(`/profil/${comment.auteur?._id}`)}
+    style={{ color: "#2563EB", cursor: "pointer", textDecoration: "underline" }}
+  >
+    {comment.auteur?.prenom || comment.auteur?.email}
+  </span>{" "}
+  le {new Date(comment.dateCreation).toLocaleString("fr-FR")}
+</p>
+
               <p className="mb-2 whitespace-pre-line">{comment.contenu}</p>
 
               {comment.piecesJointes?.length > 0 && (
