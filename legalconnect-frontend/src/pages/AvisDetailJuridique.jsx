@@ -195,9 +195,17 @@ console.log("PROPOSITIONS :", avis.propositions);
       </h2>
 
       <p><strong>Description :</strong> {avis.description}</p>
-      <p>
-        <strong>Déposé par :</strong> {avis.utilisateurId?.prenom} {avis.utilisateurId?.nom} ({avis.utilisateurId?.email})
-      </p>
+     <p>
+  <strong>Déposé par :</strong>{" "}
+  <span
+    style={{ cursor: "pointer", color: "#1d4ed8", textDecoration: "underline" }}
+    onClick={() => navigate(`/profil/${avis.utilisateurId?._id}`)}
+  >
+    {avis.utilisateurId?.prenom} {avis.utilisateurId?.nom}
+  </span>{" "}
+  ({avis.utilisateurId?.email})
+</p>
+
       <p><strong>Date :</strong> {new Date(avis.dateDepot).toLocaleDateString()}</p>
 
       <hr style={{ margin: "1.5rem 0" }} />
