@@ -3,6 +3,8 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../services/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 const AvisDetailJuridique = () => {
   const { id } = useParams();
@@ -18,6 +20,7 @@ const AvisDetailJuridique = () => {
   const [fileDescription, setFileDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchAvis = async () => {
     try {
@@ -425,7 +428,21 @@ console.log("PROPOSITIONS :", avis.propositions);
       <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #eee", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
         {avis.chat.map((msg) => (
           <div key={msg._id} style={{ marginBottom: "1rem", backgroundColor: "#f3f4f6", padding: "0.5rem", borderRadius: "8px" }}>
-            <strong>{msg.auteurId?.prenom || msg.auteurId?.email}</strong> ({new Date(msg.date).toLocaleString()}):
+            <div
+  style={{
+    fontSize: "0.85rem",
+    fontWeight: "bold",
+    marginBottom: "0.3rem",
+    cursor: "pointer",
+    textDecoration: "underline",
+  }}
+  onClick={() => navigate(`/profil/${msg.auteurId?._id}`)}
+>
+  {msg.auteurId?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "}
+  {msg.auteurId?.prenom?.trim() ? msg.auteurId.prenom : msg.auteurId?.email}
+  {msg.auteurId?.role ? ` - ${msg.auteurId.role}` : ""}
+</div>
+
             <p>{msg.texte}</p>
           </div>
         ))}
