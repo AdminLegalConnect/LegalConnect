@@ -2,9 +2,6 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import { AuthContext } from "../../services/AuthContext";
-import api from "../services/api"; 
-
-api.get('/api/users')
 
 const Login = () => {
   const { user, setUser, loading } = useContext(AuthContext);
