@@ -125,7 +125,16 @@ const demanderPaiement = async () => {
           <p><strong>Description :</strong> {complaint.description}</p>
           <p><strong>Statut :</strong> {complaint.statut}</p>
           <p><strong>Visibilité :</strong> {complaint.visibilite}</p>
-          <p><strong>Créateur :</strong> {complaint.utilisateur?.prenom} {complaint.utilisateur?.nom} ({complaint.utilisateur?.email})</p>
+          <p>
+  <strong>Créateur :</strong>{" "}
+  <span
+    onClick={() => navigate(`/profil/${complaint.utilisateur?._id}`)}
+    style={{ color: "#2563EB", cursor: "pointer", textDecoration: "underline" }}
+  >
+    {complaint.utilisateur?.prenom} {complaint.utilisateur?.nom} ({complaint.utilisateur?.email})
+  </span>
+</p>
+
           <p><strong>Date de dépôt :</strong> {new Date(complaint.date_creation).toLocaleDateString()}</p>
         </div>
       )}
@@ -134,11 +143,18 @@ const demanderPaiement = async () => {
         <div>
           <div style={styles.chatBox}>
             {complaint.chat.map((msg) => (
-              <div key={msg._id} style={styles.message}>
-                <strong>{msg.expediteur?.prenom || msg.expediteur?.email}</strong> – {new Date(msg.date).toLocaleString()}<br />
-                {msg.message}
-              </div>
-            ))}
+  <div key={msg._id} style={styles.message}>
+    <strong
+      onClick={() => navigate(`/profil/${msg.expediteur?._id}`)}
+      style={{ color: "#2563EB", cursor: "pointer", textDecoration: "underline" }}
+    >
+      {msg.expediteur?.prenom || msg.expediteur?.email}
+    </strong>{" "}
+    – {new Date(msg.date).toLocaleString()}<br />
+    {msg.message}
+  </div>
+))}
+
             <div ref={messagesEndRef} />
           </div>
           <textarea
@@ -173,10 +189,17 @@ const demanderPaiement = async () => {
         <div>
           <p><strong>Participants :</strong></p>
           <ul>
-            {complaint.participants.map((p, index) => (
-              <li key={index}>{p.prenom || p.email}</li>
-            ))}
-          </ul>
+  {complaint.participants.map((p, index) => (
+    <li
+      key={index}
+      onClick={() => navigate(`/profil/${p._id}`)}
+      style={{ color: "#2563EB", cursor: "pointer", textDecoration: "underline" }}
+    >
+      {p.prenom || p.email}
+    </li>
+  ))}
+</ul>
+
           <button onClick={() => navigator.clipboard.writeText(window.location.href)} style={styles.button}>Partager / Copier le lien</button>
         </div>
       )}
