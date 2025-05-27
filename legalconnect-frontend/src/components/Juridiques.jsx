@@ -11,9 +11,25 @@ const Juridiques = () => {
 
   const navigate = useNavigate();
 
-  const handleMessageClick = (id) => {
-    navigate(`/messagerie?dest=${id}`);
-  };
+  const handleMessageClick = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:5000/api/messages/discussions", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const existingDiscussion = res.data.find(d => d.user._id === id);
+    if (existingDiscussion) {
+      navigate(`/messagerie/${id}`);
+    } else {
+      navigate(`/messagerie/nouveau?dest=${id}`);
+    }
+  } catch (err) {
+    console.error("Erreur vérification discussion existante", err);
+    navigate(`/messagerie/nouveau?dest=${id}`);
+  }
+};
+
 
   const rechercher = async () => {
     try {

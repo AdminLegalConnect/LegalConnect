@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 const NouvelleDiscussion = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const destIdFromQuery = queryParams.get("dest");
+
   const [utilisateurs, setUtilisateurs] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useState(destIdFromQuery || "");
   const [message, setMessage] = useState("");
   const [recherche, setRecherche] = useState("");
-  const navigate = useNavigate();
+
 
   const fetchUtilisateurs = async () => {
     try {
@@ -46,6 +52,16 @@ const NouvelleDiscussion = () => {
       .toLowerCase()
       .includes(recherche.toLowerCase())
   );
+
+  useEffect(() => {
+  if (destIdFromQuery && utilisateurs.length > 0) {
+    const existe = utilisateurs.some(u => u._id === destIdFromQuery);
+    if (existe) {
+      setSelectedId(destIdFromQuery);
+    }
+  }
+}, [utilisateurs, destIdFromQuery]);
+
 
   return (
     <div style={styles.container}>
