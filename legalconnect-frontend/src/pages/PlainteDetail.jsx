@@ -129,9 +129,10 @@ useEffect(() => {
   }
 }, [complaint?.chat?.length]);
 
-  useEffect(() => {
+useEffect(() => {
   if (complaint && user) {
-    console.log("User ID :", user._id);
+    const userId = user?._id || user?.id;
+    console.log("User ID :", userId);
     console.log("Créateur ID :", complaint.utilisateur?._id);
   }
 }, [complaint, user]);
