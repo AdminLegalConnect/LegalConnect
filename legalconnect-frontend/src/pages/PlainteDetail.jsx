@@ -377,7 +377,13 @@ const isCreator = user && complaint.utilisateur && String(user.id) === String(co
           >
             <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.3rem" }}>
               {expediteur?.role === "juridique" ? "🧑‍⚖️ " : "🙋 "} 
-              {expediteur?.prenom || expediteur?.email} 
+              <span
+  onClick={() => navigate(`/profil/${expediteur._id}`)}
+  style={{ cursor: "pointer", textDecoration: "underline" }}
+>
+  {expediteur?.prenom || expediteur?.email}
+</span>
+
               {expediteur?.role ? ` - ${expediteur.role}` : ""}
             </div>
             <div>{msg.message}</div>
@@ -472,7 +478,16 @@ const isCreator = user && complaint.utilisateur && String(user.id) === String(co
 
             {complaint.utilisateur && (
               <div>
-                <p><strong>Créateur :</strong> {complaint.utilisateur.prenom || complaint.utilisateur.email}</p>
+                <p>
+  <strong>Créateur :</strong>{" "}
+  <span
+    onClick={() => navigate(`/profil/${complaint.utilisateur._id}`)}
+    style={{ cursor: "pointer", textDecoration: "underline" }}
+  >
+    {complaint.utilisateur.prenom || complaint.utilisateur.email}
+  </span>
+</p>
+
               </div>
             )}
 
@@ -482,7 +497,13 @@ const isCreator = user && complaint.utilisateur && String(user.id) === String(co
                 <ul>
   {complaint.participants.map((p, index) => (
     <li key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-      <span>{p.prenom || p.email}</span>
+      <span
+  onClick={() => navigate(`/profil/${p._id}`)}
+  style={{ cursor: "pointer", textDecoration: "underline" }}
+>
+  {p.prenom || p.email}
+</span>
+
       {user && complaint.utilisateur && (user.id || user._id)?.toString() === complaint.utilisateur._id?.toString()
  && (
         <button
